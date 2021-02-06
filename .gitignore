@@ -351,3 +351,4 @@ MigrationBackup/
 
 #IB client gateway
 clientportal.gw/
+.vscode
