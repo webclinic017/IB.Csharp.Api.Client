@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using IB.Api.Client.Model;
 using IB.Api.Client.Response;
 using Newtonsoft.Json;
 
@@ -16,6 +18,7 @@ namespace IB.Api.Client
         private string _validateUrl = "portal/sso/validate";
         private string _iServerStatusUrl = "portal/iserver/auth/status";
         private string _iServerReauthenticate = "portal/iserver/reauthenticate";
+        private string _accounts = "portal/portfolio/accounts";
 
         public RestApiClient(string baseUri, string useragent)
         {
@@ -78,6 +81,10 @@ namespace IB.Api.Client
         public ReauthenticateResponse Reauthenticate()
         {
             return PostApiResponse<ReauthenticateResponse>(_iServerReauthenticate);
+        }
+        public List<Account> Accounts()
+        {
+            return GetApiResponse<List<Account>>(_accounts);
         }
     }
 }

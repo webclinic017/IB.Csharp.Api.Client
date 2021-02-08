@@ -10,6 +10,7 @@
             //var validateResponse = ibRestApiClient.Validate();
             //var statusResponse = ibRestApiClient.Status();
             //var reauthenticateResponse = ibRestApiClient.Reauthenticate();
+            var accounts = ibRestApiClient.Accounts();
         }
 
         private static string getUserAgent()
