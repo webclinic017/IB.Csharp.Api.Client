@@ -5,10 +5,17 @@
         static void Main(string[] args)
         {
             var baseUri = "https://localhost:5000/v1";
-            var userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0";
 
-            var ibRestApiClient = new RestApiClient(baseUri, userAgent);
-            var validateResponse = ibRestApiClient.Validate();
+            var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
+            //var validateResponse = ibRestApiClient.Validate();
+            //var statusResponse = ibRestApiClient.Status();
+            //var reauthenticateResponse = ibRestApiClient.Reauthenticate();
+        }
+
+        private static string getUserAgent()
+        {
+            //change user agent to match the browser you have used to authenticate
+            return "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0";
         }
     }
 }

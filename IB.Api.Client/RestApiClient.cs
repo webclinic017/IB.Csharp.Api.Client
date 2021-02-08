@@ -13,7 +13,9 @@ namespace IB.Api.Client
     {
         private string _baseUri;
         private string _userAgent;
-        private string VALIDATE_URI = "portal/sso/validate";
+        private string _validateUrl = "portal/sso/validate";
+        private string _iServerStatusUrl = "portal/iserver/auth/status";
+        private string _iServerReauthenticate = "portal/iserver/reauthenticate";
 
         public RestApiClient(string baseUri, string useragent)
         {
@@ -44,10 +46,38 @@ namespace IB.Api.Client
                 }
             }
         }
+        private T PostApiResponse<T>(string query)
+        {
+            using (var httpClientHandler = new HttpClientHandler())
+            {
+                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                {
+                    return true;
+                };
+                using (var httpClient = new HttpClient(httpClientHandler))
+                {
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", _userAgent);
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+                    var url = $"{_baseUri}/{query}";
+                    using var stringContent = new StringContent("");
+                    var response = httpClient.PostAsync(new Uri($"{_baseUri}/{query}"), stringContent).Result;
+                    var result = response.Content.ReadAsStringAsync().Result;
+                    return JsonConvert.DeserializeObject<T>(result);
+                }
+            }
+        }
         public ValidateResponse Validate()
         {
-            return GetApiResponse<ValidateResponse>(VALIDATE_URI);
+            return GetApiResponse<ValidateResponse>(_validateUrl);
+        }
+        public StatusResponse Status()
+        {
+            return GetApiResponse<StatusResponse>(_iServerStatusUrl);
+        }
+        public ReauthenticateResponse Reauthenticate()
+        {
+            return PostApiResponse<ReauthenticateResponse>(_iServerReauthenticate);
         }
     }
 }
