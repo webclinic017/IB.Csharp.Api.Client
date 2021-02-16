@@ -15,7 +15,8 @@ namespace IB.Api.Client
     {
         private string _baseUri;
         private string _userAgent;
-        private string _validateUrl = "portal/sso/validate";
+
+        private string _sessionValidateUrl = "portal/sso/validate";
         private string _iServerStatusUrl = "portal/iserver/auth/status";
         private string _iServerReauthenticate = "portal/iserver/reauthenticate";
         private string _accounts = "portal/portfolio/accounts";
@@ -70,9 +71,10 @@ namespace IB.Api.Client
                 }
             }
         }
-        public ValidateResponse Validate()
+
+        public SessionValidateResponse SessionValidate()
         {
-            return GetApiResponse<ValidateResponse>(_validateUrl);
+            return GetApiResponse<SessionValidateResponse>(_sessionValidateUrl);
         }
         public StatusResponse Status()
         {

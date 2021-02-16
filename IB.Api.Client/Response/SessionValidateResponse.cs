@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace IB.Api.Client.Response
 {
-    public class ValidateResponse
+    public class SessionValidateResponse
     {
         [JsonProperty("PAPER_USER_NAME")]
         public string PaperUserName { get; set; }
