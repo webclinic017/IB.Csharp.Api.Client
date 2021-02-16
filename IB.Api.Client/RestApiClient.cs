@@ -6,6 +6,7 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using IB.Api.Client.Response;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace IB.Api.Client
 {
@@ -88,6 +89,11 @@ namespace IB.Api.Client
         public PortfolioSubAccountsResponse PortfolioSubAccounts()
         {
             return GetApiResponse<PortfolioSubAccountsResponse>("portal/portfolio/subaccounts");
+        }
+        public PortfolioAccountSummaryResponse PortfolioAccountSummary(string accountId)
+        {
+            JObject data = GetApiResponse<JObject>($"portal/portfolio/{accountId}/summary");
+            return new PortfolioAccountSummaryResponse(data);
         }
     }
 }

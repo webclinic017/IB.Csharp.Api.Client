@@ -11,7 +11,8 @@
             //var sessionStatus = ibRestApiClient.SessionStatus();
             //var sessionTickleResponse = ibRestApiClient.SessionTickle();
             //var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
-            var portfolioSubAccountsResponse = ibRestApiClient.PortfolioSubAccounts();
+            //var portfolioSubAccountsResponse = ibRestApiClient.PortfolioSubAccounts();
+            var portfolioAccountSummaryResponse = ibRestApiClient.PortfolioAccountSummary("");
         }
 
         private static string getUserAgent()
