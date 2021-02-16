@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace IB.Api.Client.Response
 {
-    public class ReauthenticateResponse
+    public class SessionReauthenticateResponse
     {
         [JsonProperty("message")]
         public string Message { get; set; }

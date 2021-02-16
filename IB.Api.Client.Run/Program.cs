@@ -9,6 +9,8 @@
             var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
             //var sessionValidateResponse = ibRestApiClient.SessionValidate();
             //var sessionStatus = ibRestApiClient.SessionStatus();
+            //var sessionTickleResponse = ibRestApiClient.SessionTickle();
+            var brokerageAccountsResponse = ibRestApiClient.BrokerageAccounts();
         }
 
         private static string getUserAgent()

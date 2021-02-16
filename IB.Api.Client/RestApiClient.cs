@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using IB.Api.Client.Model;
 using IB.Api.Client.Response;
 using Newtonsoft.Json;
 
@@ -15,13 +13,6 @@ namespace IB.Api.Client
     {
         private string _baseUri;
         private string _userAgent;
-
-        private string _sessionValidateUrl = "portal/sso/validate";
-        private string _sessionStatusUrl = "portal/iserver/auth/status";
-
-
-        private string _iServerReauthenticate = "portal/iserver/reauthenticate";
-        private string _accounts = "portal/portfolio/accounts";
 
         public RestApiClient(string baseUri, string useragent)
         {
@@ -76,19 +67,23 @@ namespace IB.Api.Client
 
         public SessionValidateResponse SessionValidate()
         {
-            return GetApiResponse<SessionValidateResponse>(_sessionValidateUrl);
+            return GetApiResponse<SessionValidateResponse>("portal/sso/validate");
         }
         public SessionStatusResponse SessionStatus()
         {
-            return GetApiResponse<SessionStatusResponse>(_sessionStatusUrl);
+            return GetApiResponse<SessionStatusResponse>("portal/iserver/auth/status");
         }
-        public ReauthenticateResponse Reauthenticate()
+        public SessionReauthenticateResponse SessionReauthenticate()
         {
-            return PostApiResponse<ReauthenticateResponse>(_iServerReauthenticate);
+            return PostApiResponse<SessionReauthenticateResponse>("portal/iserver/reauthenticate");
         }
-        public List<Account> Accounts()
+        public SessionTickleResponse SessionTickle()
         {
-            return GetApiResponse<List<Account>>(_accounts);
+            return GetApiResponse<SessionTickleResponse>("portal/tickle");
+        }
+        public AccountBrokerageResponse BrokerageAccounts()
+        {
+            return GetApiResponse<AccountBrokerageResponse>("portal/portfolio/accounts");
         }
     }
 }
