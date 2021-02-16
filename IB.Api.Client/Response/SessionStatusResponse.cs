@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace IB.Api.Client.Response
 {
-    public class StatusResponse
+    public class SessionStatusResponse
     {
         [JsonProperty("authenticated")]
         public bool Authenticated { get; set; }

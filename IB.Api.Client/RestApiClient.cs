@@ -17,7 +17,9 @@ namespace IB.Api.Client
         private string _userAgent;
 
         private string _sessionValidateUrl = "portal/sso/validate";
-        private string _iServerStatusUrl = "portal/iserver/auth/status";
+        private string _sessionStatusUrl = "portal/iserver/auth/status";
+
+
         private string _iServerReauthenticate = "portal/iserver/reauthenticate";
         private string _accounts = "portal/portfolio/accounts";
 
@@ -76,9 +78,9 @@ namespace IB.Api.Client
         {
             return GetApiResponse<SessionValidateResponse>(_sessionValidateUrl);
         }
-        public StatusResponse Status()
+        public SessionStatusResponse SessionStatus()
         {
-            return GetApiResponse<StatusResponse>(_iServerStatusUrl);
+            return GetApiResponse<SessionStatusResponse>(_sessionStatusUrl);
         }
         public ReauthenticateResponse Reauthenticate()
         {

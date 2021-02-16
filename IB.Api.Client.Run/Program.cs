@@ -7,7 +7,8 @@
             var baseUri = "https://localhost:5000/v1";
 
             var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
-            var sessionValidateResponse = ibRestApiClient.SessionValidate();
+            //var sessionValidateResponse = ibRestApiClient.SessionValidate();
+            //var sessionStatus = ibRestApiClient.SessionStatus();
         }
 
         private static string getUserAgent()
