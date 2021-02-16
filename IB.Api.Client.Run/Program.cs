@@ -10,7 +10,8 @@
             //var sessionValidateResponse = ibRestApiClient.SessionValidate();
             //var sessionStatus = ibRestApiClient.SessionStatus();
             //var sessionTickleResponse = ibRestApiClient.SessionTickle();
-            var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
+            //var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
+            var portfolioSubAccountsResponse = ibRestApiClient.PortfolioSubAccounts();
         }
 
         private static string getUserAgent()

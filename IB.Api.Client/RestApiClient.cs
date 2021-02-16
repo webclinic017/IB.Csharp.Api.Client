@@ -81,9 +81,13 @@ namespace IB.Api.Client
         {
             return GetApiResponse<SessionTickleResponse>("portal/tickle");
         }
-        public AccountsPortfolioResponse PortfolioAccounts()
+        public PortfolioAccountsResponse PortfolioAccounts()
         {
-            return GetApiResponse<AccountsPortfolioResponse>("portal/portfolio/accounts");
+            return GetApiResponse<PortfolioAccountsResponse>("portal/portfolio/accounts");
+        }
+        public PortfolioSubAccountsResponse PortfolioSubAccounts()
+        {
+            return GetApiResponse<PortfolioSubAccountsResponse>("portal/portfolio/subaccounts");
         }
     }
 }
