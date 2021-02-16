@@ -3,7 +3,7 @@ using IB.Api.Client.Model;
 
 namespace IB.Api.Client.Response
 {
-    public class AccountBrokerageResponse : List<Account>
+    public class AccountsPortfolioResponse : List<Account>
     {
     }
 }

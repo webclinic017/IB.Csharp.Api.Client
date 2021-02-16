@@ -10,7 +10,7 @@
             //var sessionValidateResponse = ibRestApiClient.SessionValidate();
             //var sessionStatus = ibRestApiClient.SessionStatus();
             //var sessionTickleResponse = ibRestApiClient.SessionTickle();
-            var brokerageAccountsResponse = ibRestApiClient.BrokerageAccounts();
+            var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
         }
 
         private static string getUserAgent()
