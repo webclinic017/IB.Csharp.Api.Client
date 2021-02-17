@@ -1,4 +1,6 @@
-﻿namespace IB.Api.Client.Run
+﻿using System.Linq;
+
+namespace IB.Api.Client.Run
 {
     class Program
     {
@@ -7,12 +9,10 @@
             var baseUri = "https://localhost:5000/v1";
 
             var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
-            //var sessionValidateResponse = ibRestApiClient.SessionValidate();
-            //var sessionStatus = ibRestApiClient.SessionStatus();
-            //var sessionTickleResponse = ibRestApiClient.SessionTickle();
-            //var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
-            //var portfolioSubAccountsResponse = ibRestApiClient.PortfolioSubAccounts();
-            var portfolioAccountSummaryResponse = ibRestApiClient.PortfolioAccountSummary("");
+            var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
+            var account = portfolioAccountsResponse.FirstOrDefault(x => x.Type == "DEMO");
+            var sessionStatus = ibRestApiClient.SessionStatus();
+            var portfolioPositions = ibRestApiClient.PortfolioPositions(account.AccountId);
         }
 
         private static string getUserAgent()

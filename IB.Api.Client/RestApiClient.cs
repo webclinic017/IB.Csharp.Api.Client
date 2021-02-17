@@ -95,5 +95,13 @@ namespace IB.Api.Client
             JObject data = GetApiResponse<JObject>($"portal/portfolio/{accountId}/summary");
             return new PortfolioAccountSummaryResponse(data);
         }
+        public PortfolioPositionsResponse PortfolioPositions(string accountId)
+        {
+            return GetApiResponse<PortfolioPositionsResponse>($"portal/portfolio/{accountId}/positions/0");
+        }
+        public TradesResponse Trades()
+        {
+            return GetApiResponse<TradesResponse>("portal/iserver/account/trades");
+        }
     }
 }
