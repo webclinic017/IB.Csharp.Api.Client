@@ -25,7 +25,7 @@ namespace IB.Api.Client
                     return true;
                 };
         }
-        private T GetApiResponse<T>(string query)
+        private T GetApiResponse<T>(string query, bool printResult)
         {
             using (var httpClientHandler = new HttpClientHandler())
             {
@@ -40,9 +40,15 @@ namespace IB.Api.Client
 
                     var url = $"{_baseUri}/{query}";
                     var result = httpClient.GetStringAsync(new Uri(url)).Result;
+                    PrintResult(printResult, result);
                     return JsonConvert.DeserializeObject<T>(result);
                 }
             }
+        }
+        private void PrintResult(bool printResult, string result)
+        {
+            if (printResult)
+                Console.WriteLine(result);
         }
         private T PostApiResponse<T>(string query)
         {
@@ -65,14 +71,13 @@ namespace IB.Api.Client
                 }
             }
         }
-
         public SessionValidateResponse SessionValidate()
         {
-            return GetApiResponse<SessionValidateResponse>("portal/sso/validate");
+            return GetApiResponse<SessionValidateResponse>("portal/sso/validate", false);
         }
         public SessionStatusResponse SessionStatus()
         {
-            return GetApiResponse<SessionStatusResponse>("portal/iserver/auth/status");
+            return GetApiResponse<SessionStatusResponse>("portal/iserver/auth/status", false);
         }
         public SessionReauthenticateResponse SessionReauthenticate()
         {
@@ -80,28 +85,32 @@ namespace IB.Api.Client
         }
         public SessionTickleResponse SessionTickle()
         {
-            return GetApiResponse<SessionTickleResponse>("portal/tickle");
+            return GetApiResponse<SessionTickleResponse>("portal/tickle", false);
         }
         public PortfolioAccountsResponse PortfolioAccounts()
         {
-            return GetApiResponse<PortfolioAccountsResponse>("portal/portfolio/accounts");
+            return GetApiResponse<PortfolioAccountsResponse>("portal/portfolio/accounts", false);
         }
         public PortfolioSubAccountsResponse PortfolioSubAccounts()
         {
-            return GetApiResponse<PortfolioSubAccountsResponse>("portal/portfolio/subaccounts");
+            return GetApiResponse<PortfolioSubAccountsResponse>("portal/portfolio/subaccounts", false);
         }
         public PortfolioAccountSummaryResponse PortfolioAccountSummary(string accountId)
         {
-            JObject data = GetApiResponse<JObject>($"portal/portfolio/{accountId}/summary");
+            JObject data = GetApiResponse<JObject>($"portal/portfolio/{accountId}/summary", false);
             return new PortfolioAccountSummaryResponse(data);
         }
         public PortfolioPositionsResponse PortfolioPositions(string accountId)
         {
-            return GetApiResponse<PortfolioPositionsResponse>($"portal/portfolio/{accountId}/positions/0");
+            return GetApiResponse<PortfolioPositionsResponse>($"portal/portfolio/{accountId}/positions/0", false);
+        }
+        public PortfolioAccountLedgerResponse PortfolioAccountLedger(string accountId)
+        {
+            return GetApiResponse<PortfolioAccountLedgerResponse>($"portal/portfolio/{accountId}/ledger", false);
         }
         public TradesResponse Trades()
         {
-            return GetApiResponse<TradesResponse>("portal/iserver/account/trades");
+            return GetApiResponse<TradesResponse>("portal/iserver/account/trades", false);
         }
     }
 }

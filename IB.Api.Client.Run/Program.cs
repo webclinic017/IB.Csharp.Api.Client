@@ -11,8 +11,7 @@ namespace IB.Api.Client.Run
             var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
             var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
             var account = portfolioAccountsResponse.FirstOrDefault(x => x.Type == "DEMO");
-            var sessionStatus = ibRestApiClient.SessionStatus();
-            var portfolioPositions = ibRestApiClient.PortfolioPositions(account.AccountId);
+            var summary = ibRestApiClient.PortfolioAccountSummary(account.AccountId);
         }
 
         private static string getUserAgent()
