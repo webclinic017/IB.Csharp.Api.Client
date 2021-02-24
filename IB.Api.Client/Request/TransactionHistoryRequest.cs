@@ -9,7 +9,7 @@ namespace IB.Api.Client.Request
         public List<string> AccountIds;
 
         [JsonProperty("conids")]
-        public List<int> ConIds;
+        public List<long> ConIds;
 
         [JsonProperty("currency")]
         public string Currency;

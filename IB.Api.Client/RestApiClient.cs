@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using IB.Api.Client.Model.Enum;
 using IB.Api.Client.Request;
 using IB.Api.Client.Response;
 using Newtonsoft.Json;
@@ -111,13 +112,14 @@ namespace IB.Api.Client
         {
             return GetApiResponse<PortfolioAccountLedgerResponse>($"/portfolio/{accountId}/ledger");
         }
-        public PortfolioAnalystTransactionHistoryResponse PortfolioAnalystTransactionHistory(List<string> accountIds, int days)
+        public PortfolioAnalystTransactionHistoryResponse PortfolioAnalystTransactionHistory(List<string> accountIds, List<long> contractIds, int days)
         {
             var request = new TransactionHistoryRequest
             {
                 AccountIds = accountIds,
                 Days = days,
-                Currency = "GBP"
+                Currency = "GBP",
+                ConIds = contractIds
             };
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<PortfolioAnalystTransactionHistoryResponse>("/pa/transactions", payload, true);
@@ -131,6 +133,22 @@ namespace IB.Api.Client
             };
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<ContractSearchResponse>("/iserver/secdef/search", payload);
+        }
+        public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
+        {
+            var request = new OrderPreviewRequest
+            {
+                AccountId = accountId,
+                ContractId = contractId,
+                OrderType = OrderType.MKT,
+                ListingExchange = Exchange.SMART,
+                OutsideRegularHours = true,
+                Side = Side.BUY,
+                Quantity = quantity,
+                Expiry = Expiry.GTC
+            };
+            var payload = JsonConvert.SerializeObject(request);
+            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload, true);
         }
         public TradesResponse Trades()
         {

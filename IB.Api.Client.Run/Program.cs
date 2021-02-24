@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using IB.Api.Client.Helper.ContractIds;
 
 namespace IB.Api.Client.Run
 {
@@ -12,8 +12,7 @@ namespace IB.Api.Client.Run
             var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
             var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
             var account = portfolioAccountsResponse.FirstOrDefault(x => x.Type == "DEMO");
-            //var transactions = ibRestApiClient.PortfolioAnalystTransactionHistory(new List<string> { account.AccountId }, 7);
-            var contracts = ibRestApiClient.ContractSearch("GBP.USD", true);
+            var orderPreview = ibRestApiClient.OrderPreview(account.AccountId, Nasdaq.APPLE, 1);
         }
 
         private static string getUserAgent()
