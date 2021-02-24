@@ -1,5 +1,6 @@
 using IB.Api.Client.Model.Enum;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace IB.Api.Client.Request
 {
@@ -21,9 +22,11 @@ namespace IB.Api.Client.Request
         public string ParentId { get; set; }
 
         [JsonProperty("orderType")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public OrderType OrderType { get; set; }
 
         [JsonProperty("listingExchange")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public Exchange ListingExchange { get; set; }
 
         [JsonProperty("outsideRTH")]
@@ -33,12 +36,14 @@ namespace IB.Api.Client.Request
         public double Price { get; set; }
 
         [JsonProperty("side")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public Side Side { get; set; }
 
         [JsonProperty("ticker")]
         public string Ticker { get; set; }
 
         [JsonProperty("tif")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public Expiry Expiry { get; set; }
 
         [JsonProperty("referrer")]
@@ -57,6 +62,7 @@ namespace IB.Api.Client.Request
         public bool IsCurrencyConversion { get; set; }
 
         [JsonProperty("allocationMethod")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public AllocationMethod AllocationMethod { get; set; }
     }
 }

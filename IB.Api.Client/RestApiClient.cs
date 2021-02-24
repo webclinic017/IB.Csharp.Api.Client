@@ -142,10 +142,11 @@ namespace IB.Api.Client
                 ContractId = contractId,
                 OrderType = OrderType.MKT,
                 ListingExchange = Exchange.SMART,
-                OutsideRegularHours = true,
+                OutsideRegularHours = false,
                 Side = Side.BUY,
                 Quantity = quantity,
-                Expiry = Expiry.GTC
+                Expiry = Expiry.GTC,
+                AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload, true);
