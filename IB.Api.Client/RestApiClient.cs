@@ -149,7 +149,7 @@ namespace IB.Api.Client
                 OutsideRegularHours = false,
                 Side = Side.BUY,
                 Quantity = quantity,
-                Expiry = Expiry.GTC,
+                Expiry = TimeInForce.GTC,
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);
@@ -166,7 +166,7 @@ namespace IB.Api.Client
                 OutsideRegularHours = false,
                 Side = Side.BUY,
                 Quantity = quantity,
-                Expiry = Expiry.GTC,
+                Expiry = TimeInForce.GTC,
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);

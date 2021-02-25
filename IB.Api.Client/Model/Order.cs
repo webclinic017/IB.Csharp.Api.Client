@@ -72,7 +72,7 @@ namespace IB.Api.Client.Model
         public string Side { get; set; }
 
         [JsonProperty("timeInForce")]
-        public string TimeInForce { get; set; }
+        public TimeInForce TimeInForce { get; set; }
 
         [JsonProperty("price")]
         public long Price { get; set; }

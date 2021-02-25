@@ -44,7 +44,7 @@ namespace IB.Api.Client.Request
 
         [JsonProperty("tif")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public Expiry Expiry { get; set; }
+        public TimeInForce Expiry { get; set; }
 
         [JsonProperty("referrer")]
         public string Referrer { get; set; }

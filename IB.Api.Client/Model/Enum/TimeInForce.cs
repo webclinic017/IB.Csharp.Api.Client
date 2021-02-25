@@ -1,6 +1,6 @@
 namespace IB.Api.Client.Model.Enum
 {
-    public enum Expiry
+    public enum TimeInForce
     {
         GTC,
         DAY
