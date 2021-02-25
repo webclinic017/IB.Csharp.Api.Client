@@ -136,7 +136,7 @@ namespace IB.Api.Client
         }
         public OrdersResponse Orders()
         {
-            return GetApiResponse<OrdersResponse>($"/iserver/account/orders", true);
+            return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
         }
         public OrderPlaceResponse OrderPlace(string accountId, int contractId, double quantity)
         {
