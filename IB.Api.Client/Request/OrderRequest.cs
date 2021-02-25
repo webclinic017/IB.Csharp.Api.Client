@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 
 namespace IB.Api.Client.Request
 {
-    public class OrderPreviewRequest
+    public class OrderRequest
     {
         [JsonProperty("acctId")]
         public string AccountId { get; set; }
@@ -63,6 +63,6 @@ namespace IB.Api.Client.Request
 
         [JsonProperty("allocationMethod")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public AllocationMethod AllocationMethod { get; set; }
+        public AllocationMethod? AllocationMethod { get; set; }
     }
 }

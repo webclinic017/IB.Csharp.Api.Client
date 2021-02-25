@@ -12,7 +12,7 @@ namespace IB.Api.Client.Run
             var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
             var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
             var account = portfolioAccountsResponse.FirstOrDefault(x => x.Type == "DEMO");
-            var orderPreview = ibRestApiClient.OrderPreview(account.AccountId, Nasdaq.APPLE, 1);
+            var orderPlaceResponse = ibRestApiClient.OrderPlace(account.AccountId, Nasdaq.APPLE, 1);
         }
 
         private static string getUserAgent()

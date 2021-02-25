@@ -134,9 +134,13 @@ namespace IB.Api.Client
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<ContractSearchResponse>("/iserver/secdef/search", payload);
         }
-        public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
+        public OrdersResponse Orders()
         {
-            var request = new OrderPreviewRequest
+            return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
+        }
+        public OrderPlaceResponse OrderPlace(string accountId, int contractId, double quantity)
+        {
+            var request = new OrderRequest
             {
                 AccountId = accountId,
                 ContractId = contractId,
@@ -149,7 +153,24 @@ namespace IB.Api.Client
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload, true);
+            return PostApiResponse<OrderPlaceResponse>($"/iserver/account/{accountId}/order", payload, true);
+        }
+        public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
+        {
+            var request = new OrderRequest
+            {
+                AccountId = accountId,
+                ContractId = contractId,
+                OrderType = OrderType.MKT,
+                ListingExchange = Exchange.SMART,
+                OutsideRegularHours = false,
+                Side = Side.BUY,
+                Quantity = quantity,
+                Expiry = Expiry.GTC,
+                AllocationMethod = AllocationMethod.AvailableEquity
+            };
+            var payload = JsonConvert.SerializeObject(request);
+            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload);
         }
         public TradesResponse Trades()
         {
