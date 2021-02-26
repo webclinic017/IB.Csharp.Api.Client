@@ -4,6 +4,7 @@ namespace IB.Api.Client.Model.Enum
     {
         PendingSubmit,
         PreSubmitted,
+        Cancelled,
         Inactive
     }
 }

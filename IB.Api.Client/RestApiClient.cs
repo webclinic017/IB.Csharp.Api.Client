@@ -70,6 +70,27 @@ namespace IB.Api.Client
                 }
             }
         }
+        private T DeleteApiResponse<T>(string query, bool printResult = false)
+        {
+            using (var httpClientHandler = new HttpClientHandler())
+            {
+                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                {
+                    return true;
+                };
+                using (var httpClient = new HttpClient(httpClientHandler))
+                {
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", _userAgent);
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var url = $"{_baseUri}/{query}";
+                    var response = httpClient.DeleteAsync(new Uri($"{_baseUri}/{query}")).Result;
+                    var result = response.Content.ReadAsStringAsync().Result;
+                    PrintResult(printResult, result);
+                    return JsonConvert.DeserializeObject<T>(result);
+                }
+            }
+        }
         private void PrintResult(bool printResult, string result)
         {
             if (printResult)
@@ -154,6 +175,10 @@ namespace IB.Api.Client
             };
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<OrderPlaceResponse>($"/iserver/account/{accountId}/order", payload);
+        }
+        public OrderCancelResponse OrderCancel(string accountId, string orderId)
+        {
+            return DeleteApiResponse<OrderCancelResponse>($"/iserver/account/{accountId}/order/{orderId}");
         }
         public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
         {
