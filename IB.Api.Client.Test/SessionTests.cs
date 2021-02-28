@@ -1,4 +1,3 @@
-using System;
 using IB.Api.Client.Endpoint.Session;
 using NUnit.Framework;
 
@@ -8,7 +7,7 @@ namespace IB.Api.Client.Test
     public class SessionTests
     {
         SessionEndpoint sessionEndpoint;
-        
+
         [SetUp]
         public void Setup()
         {
