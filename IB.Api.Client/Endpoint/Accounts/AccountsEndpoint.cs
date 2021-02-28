@@ -9,17 +9,16 @@ namespace IB.Api.Client.Endpoint.Accounts
         {
             return GetApiResponse<AccountsResponse>("/portfolio/accounts");
         }
-
         public SubAccountsResponse SubAccounts()
         {
             return GetApiResponse<SubAccountsResponse>("/portfolio/subaccounts");
         }
-        public AccountSummaryResponse PortfolioAccountSummary(string accountId)
+        public AccountSummaryResponse AccountSummary(string accountId)
         {
             JObject data = GetApiResponse<JObject>($"/portfolio/{accountId}/summary");
             return new AccountSummaryResponse(data);
         }
-        public AccountLedgerResponse PortfolioAccountLedger(string accountId)
+        public AccountLedgerResponse AccountLedger(string accountId)
         {
             return GetApiResponse<AccountLedgerResponse>($"/portfolio/{accountId}/ledger");
         }
