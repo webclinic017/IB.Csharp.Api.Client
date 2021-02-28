@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using IB.Api.Client.Endpoint.Trades.Model;
+using IB.Api.Client.Endpoint.Accounts.Model;
 
 namespace IB.Api.Client.Endpoint.Accounts.Response
 {
-    public class AccountsResponse : List<Trade>
+    public class AccountsResponse : List<Account>
     {
     }
 }
