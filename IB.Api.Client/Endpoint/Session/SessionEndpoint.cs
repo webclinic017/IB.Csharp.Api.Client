@@ -4,21 +4,21 @@ namespace IB.Api.Client.Endpoint.Session
 {
     public class SessionEndpoint : BaseEndpoint
     {
-        public SessionValidateResponse ValidateSession()
+        public ValidateSessionResponse ValidateSession()
         {
-            return GetApiResponse<SessionValidateResponse>("/sso/validate");
+            return GetApiResponse<ValidateSessionResponse>("/sso/validate");
         }
         public SessionStatusResponse SessionStatus()
         {
             return GetApiResponse<SessionStatusResponse>("/iserver/auth/status");
         }
-        public SessionReauthenticateResponse ReauthenticateSession()
+        public ReauthenticateSessionResponse ReauthenticateSession()
         {
-            return PostApiResponse<SessionReauthenticateResponse>("/iserver/reauthenticate");
+            return PostApiResponse<ReauthenticateSessionResponse>("/iserver/reauthenticate");
         }
-        public SessionTickleResponse TickleSession()
+        public TickleSessionResponse TickleSession()
         {
-            return GetApiResponse<SessionTickleResponse>("/tickle");
+            return GetApiResponse<TickleSessionResponse>("/tickle");
         }
     }
 }

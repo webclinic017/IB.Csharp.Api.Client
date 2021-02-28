@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace IB.Api.Client.Endpoint.Session.Response
 {
-    public class SessionTickleResponse
+    public class TickleSessionResponse
     {
         [JsonProperty("session")]
         public string Session { get; set; }
