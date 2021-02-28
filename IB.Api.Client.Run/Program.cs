@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using IB.Api.Client.Helper.ContractIds;
 
 namespace IB.Api.Client.Run
 {
@@ -10,10 +9,10 @@ namespace IB.Api.Client.Run
             var baseUri = "https://localhost:5000/v1/portal";
 
             var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
-            var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
-            var account = portfolioAccountsResponse.FirstOrDefault(x => x.Type == "DEMO");
+            //var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
+            //var account = portfolioAccountsResponse.FirstOrDefault(x => x.Type == "DEMO");
             //var orderPlaceResponse = ibRestApiClient.OrderPlace(account.AccountId, Nasdaq.APPLE, 1);
-            var orders = ibRestApiClient.Orders();
+            //var orders = ibRestApiClient.Orders();
         }
 
         private static string getUserAgent()

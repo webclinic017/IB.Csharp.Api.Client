@@ -1,0 +1,16 @@
+namespace IB.Api.Client
+{
+    using Newtonsoft.Json;
+
+    public partial class Schema14
+    {
+        [JsonProperty("items", NullValueHandling = NullValueHandling.Ignore)]
+        public ItemsValue Items { get; set; }
+
+        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
+        public AccountAliasType? Type { get; set; }
+
+        [JsonProperty("properties", NullValueHandling = NullValueHandling.Ignore)]
+        public SystemErrorProperties Properties { get; set; }
+    }
+}

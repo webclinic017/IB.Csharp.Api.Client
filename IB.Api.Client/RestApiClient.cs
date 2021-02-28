@@ -5,9 +5,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using IB.Api.Client.Model.Enum;
-using IB.Api.Client.Request;
-using IB.Api.Client.Response;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -95,111 +92,6 @@ namespace IB.Api.Client
         {
             if (printResult)
                 Console.WriteLine(result);
-        }
-        public SessionValidateResponse SessionValidate()
-        {
-            return GetApiResponse<SessionValidateResponse>("/sso/validate");
-        }
-        public SessionStatusResponse SessionStatus()
-        {
-            return GetApiResponse<SessionStatusResponse>("/iserver/auth/status");
-        }
-        public SessionReauthenticateResponse SessionReauthenticate()
-        {
-            return PostApiResponse<SessionReauthenticateResponse>("/iserver/reauthenticate");
-        }
-        public SessionTickleResponse SessionTickle()
-        {
-            return GetApiResponse<SessionTickleResponse>("/tickle");
-        }
-        public PortfolioAccountsResponse PortfolioAccounts()
-        {
-            return GetApiResponse<PortfolioAccountsResponse>("/portfolio/accounts");
-        }
-        public PortfolioSubAccountsResponse PortfolioSubAccounts()
-        {
-            return GetApiResponse<PortfolioSubAccountsResponse>("/portfolio/subaccounts");
-        }
-        public PortfolioAccountSummaryResponse PortfolioAccountSummary(string accountId)
-        {
-            JObject data = GetApiResponse<JObject>($"/portfolio/{accountId}/summary");
-            return new PortfolioAccountSummaryResponse(data);
-        }
-        public PortfolioPositionsResponse PortfolioPositions(string accountId)
-        {
-            return GetApiResponse<PortfolioPositionsResponse>($"/portfolio/{accountId}/positions/0");
-        }
-        public PortfolioAccountLedgerResponse PortfolioAccountLedger(string accountId)
-        {
-            return GetApiResponse<PortfolioAccountLedgerResponse>($"/portfolio/{accountId}/ledger");
-        }
-        public PortfolioAnalystTransactionHistoryResponse PortfolioAnalystTransactionHistory(List<string> accountIds, List<long> contractIds, int days)
-        {
-            var request = new TransactionHistoryRequest
-            {
-                AccountIds = accountIds,
-                Days = days,
-                Currency = "GBP",
-                ConIds = contractIds
-            };
-            var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<PortfolioAnalystTransactionHistoryResponse>("/pa/transactions", payload, true);
-        }
-        public ContractSearchResponse ContractSearch(string searchText, bool isName)
-        {
-            var request = new ContractSearchRequest
-            {
-                Symbol = searchText,
-                IsName = isName
-            };
-            var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<ContractSearchResponse>("/iserver/secdef/search", payload);
-        }
-        public OrdersResponse Orders()
-        {
-            return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
-        }
-        public OrderPlaceResponse OrderPlace(string accountId, int contractId, double quantity)
-        {
-            var request = new OrderRequest
-            {
-                AccountId = accountId,
-                ContractId = contractId,
-                OrderType = OrderType.MKT,
-                ListingExchange = Exchange.SMART,
-                OutsideRegularHours = false,
-                Side = Side.BUY,
-                Quantity = quantity,
-                Expiry = TimeInForce.GTC,
-                AllocationMethod = AllocationMethod.AvailableEquity
-            };
-            var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<OrderPlaceResponse>($"/iserver/account/{accountId}/order", payload);
-        }
-        public OrderCancelResponse OrderCancel(string accountId, string orderId)
-        {
-            return DeleteApiResponse<OrderCancelResponse>($"/iserver/account/{accountId}/order/{orderId}");
-        }
-        public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
-        {
-            var request = new OrderRequest
-            {
-                AccountId = accountId,
-                ContractId = contractId,
-                OrderType = OrderType.MKT,
-                ListingExchange = Exchange.SMART,
-                OutsideRegularHours = false,
-                Side = Side.BUY,
-                Quantity = quantity,
-                Expiry = TimeInForce.GTC,
-                AllocationMethod = AllocationMethod.AvailableEquity
-            };
-            var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload);
-        }
-        public TradesResponse Trades()
-        {
-            return GetApiResponse<TradesResponse>("/iserver/account/trades");
         }
     }
 }
