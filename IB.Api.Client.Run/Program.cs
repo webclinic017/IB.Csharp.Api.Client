@@ -6,9 +6,8 @@ namespace IB.Api.Client.Run
     {
         static void Main(string[] args)
         {
-            var baseUri = "https://localhost:5000/v1/portal";
 
-            var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
+            //var ibRestApiClient = new RestApiClient(baseUri, getUserAgent());
             //var portfolioAccountsResponse = ibRestApiClient.PortfolioAccounts();
             //var account = portfolioAccountsResponse.FirstOrDefault(x => x.Type == "DEMO");
             //var orderPlaceResponse = ibRestApiClient.OrderPlace(account.AccountId, Nasdaq.APPLE, 1);
