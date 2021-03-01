@@ -3,7 +3,7 @@ using IB.Api.Client.Endpoint.Orders.Model;
 
 namespace IB.Api.Client.Endpoint.Orders.Response
 {
-    public class OrderPlaceResponse : List<OrderConfirmation>
+    public class PlaceOrderResponse : List<OrderConfirmation>
     {
     }
 }

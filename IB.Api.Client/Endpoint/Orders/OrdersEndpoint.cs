@@ -11,7 +11,7 @@ namespace IB.Api.Client.Endpoint.Orders
         {
             return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
         }
-        public OrderPlaceResponse PlaceOrder(string accountId, int contractId, double quantity)
+        public PlaceOrderResponse PlaceMarketOrder(string accountId, int contractId, double quantity)
         {
             var request = new OrderRequest
             {
@@ -26,7 +26,7 @@ namespace IB.Api.Client.Endpoint.Orders
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<OrderPlaceResponse>($"/iserver/account/{accountId}/order", payload);
+            return PostApiResponse<PlaceOrderResponse>($"/iserver/account/{accountId}/order", payload);
         }
         public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
         {
