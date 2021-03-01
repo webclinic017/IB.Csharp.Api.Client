@@ -36,7 +36,7 @@ namespace IB.Api.Client.Endpoint
 
                     var url = $"{_baseUri}/{query}";
                     var result = httpClient.GetStringAsync(new Uri(url)).Result;
-                    PrintResult(printResult, result);
+                    if (printResult) PrintResult(url, result);
                     return JsonConvert.DeserializeObject<T>(result);
                 }
             }
@@ -58,7 +58,7 @@ namespace IB.Api.Client.Endpoint
                     using var stringContent = new StringContent(payload);
                     var response = httpClient.PostAsync(new Uri($"{_baseUri}/{query}"), stringContent).Result;
                     var result = response.Content.ReadAsStringAsync().Result;
-                    PrintResult(printResult, result);
+                    if (printResult) PrintResult(url, result);
                     return JsonConvert.DeserializeObject<T>(result);
                 }
             }
@@ -79,15 +79,15 @@ namespace IB.Api.Client.Endpoint
                     var url = $"{_baseUri}/{query}";
                     var response = httpClient.DeleteAsync(new Uri($"{_baseUri}/{query}")).Result;
                     var result = response.Content.ReadAsStringAsync().Result;
-                    PrintResult(printResult, result);
+                    if (printResult) PrintResult(url, result);
                     return JsonConvert.DeserializeObject<T>(result);
                 }
             }
         }
-        private void PrintResult(bool printResult, string result)
+        private void PrintResult(string query, string result)
         {
-            if (printResult)
-                Console.WriteLine(result);
+            Console.WriteLine($"QUERY:{query}");
+            Console.WriteLine($"RESULT:{result}");
         }
     }
 }

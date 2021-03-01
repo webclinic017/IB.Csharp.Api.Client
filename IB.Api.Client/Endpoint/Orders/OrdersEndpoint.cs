@@ -9,7 +9,7 @@ namespace IB.Api.Client.Endpoint.Orders
     {
         public OrdersResponse Orders()
         {
-            return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
+            return GetApiResponse<OrdersResponse>($"/iserver/account/orders", true);
         }
         public PlaceOrderResponse PlaceMarketOrder(string accountId, int contractId, double quantity)
         {
@@ -26,7 +26,7 @@ namespace IB.Api.Client.Endpoint.Orders
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<PlaceOrderResponse>($"/iserver/account/{accountId}/order", payload);
+            return PostApiResponse<PlaceOrderResponse>($"/iserver/account/{accountId}/order", payload, true);
         }
         public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
         {
@@ -43,7 +43,7 @@ namespace IB.Api.Client.Endpoint.Orders
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload);
+            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload, true);
         }
     }
 }
