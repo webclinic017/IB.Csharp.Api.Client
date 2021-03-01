@@ -9,7 +9,7 @@ namespace IB.Api.Client.Endpoint.Orders
     {
         public OrdersResponse Orders()
         {
-            return GetApiResponse<OrdersResponse>($"/iserver/account/orders", true);
+            return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
         }
         public PlaceOrderResponse PlaceMarketOrder(string accountId, int contractId, double quantity)
         {

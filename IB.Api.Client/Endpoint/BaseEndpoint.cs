@@ -34,14 +34,14 @@ namespace IB.Api.Client.Endpoint
                     httpClient.DefaultRequestHeaders.Add("User-Agent", _userAgent);
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                    var url = $"{_baseUri}/{query}";
+                    var url = $"{_baseUri}{query}";
                     var result = httpClient.GetStringAsync(new Uri(url)).Result;
                     if (printResult) PrintResult(url, result);
                     return JsonConvert.DeserializeObject<T>(result);
                 }
             }
         }
-        protected T PostApiResponse<T>(string query, string payload = null, bool printResult = false)
+        protected T PostApiResponse<T>(string query, string payload = "", bool printResult = false)
         {
             using (var httpClientHandler = new HttpClientHandler())
             {
@@ -54,7 +54,7 @@ namespace IB.Api.Client.Endpoint
                     httpClient.DefaultRequestHeaders.Add("User-Agent", _userAgent);
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                    var url = $"{_baseUri}/{query}";
+                    var url = $"{_baseUri}{query}";
                     using var stringContent = new StringContent(payload);
                     var response = httpClient.PostAsync(new Uri($"{_baseUri}/{query}"), stringContent).Result;
                     var result = response.Content.ReadAsStringAsync().Result;
@@ -76,7 +76,7 @@ namespace IB.Api.Client.Endpoint
                     httpClient.DefaultRequestHeaders.Add("User-Agent", _userAgent);
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                    var url = $"{_baseUri}/{query}";
+                    var url = $"{_baseUri}{query}";
                     var response = httpClient.DeleteAsync(new Uri($"{_baseUri}/{query}")).Result;
                     var result = response.Content.ReadAsStringAsync().Result;
                     if (printResult) PrintResult(url, result);
