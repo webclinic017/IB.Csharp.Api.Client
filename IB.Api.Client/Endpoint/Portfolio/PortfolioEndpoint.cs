@@ -4,7 +4,7 @@ namespace IB.Api.Client.Endpoint.Portfolio
 {
     public class PortfolioEndpoint : BaseEndpoint
     {
-        public PositionsResponse PortfolioPositions(string accountId)
+        public PositionsResponse Positions(string accountId)
         {
             return GetApiResponse<PositionsResponse>($"/portfolio/{accountId}/positions/0");
         }
