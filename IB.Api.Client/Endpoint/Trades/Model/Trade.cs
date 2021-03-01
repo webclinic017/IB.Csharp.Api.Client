@@ -35,7 +35,7 @@ namespace IB.Api.Client.Endpoint.Trades.Model
         public string Exchange { get; set; }
 
         [JsonProperty("comission")]
-        public long Comission { get; set; }
+        public double Comission { get; set; }
 
         [JsonProperty("net_amount")]
         public long NetAmount { get; set; }

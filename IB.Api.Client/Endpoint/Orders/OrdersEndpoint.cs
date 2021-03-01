@@ -28,7 +28,7 @@ namespace IB.Api.Client.Endpoint.Orders
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<PlaceOrderResponse>($"/iserver/account/{accountId}/order", payload, true);
         }
-        public OrderPreviewResponse OrderPreview(string accountId, int contractId, double quantity)
+        public OrderPreviewResponse MarketOrderPreview(string accountId, int contractId, double quantity)
         {
             var request = new OrderRequest
             {
