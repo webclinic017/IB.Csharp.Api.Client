@@ -10,6 +10,7 @@ namespace IB.Api.Client.Endpoint.Accounts.Response
         public double AvailableFunds { get; }
         public double BuyingPower { get; }
         public double ExcessLiquidity { get; }
+        public double Cash { get; }
         public AccountSummaryResponse(JObject data)
         {
             AccountCode = data["accountcode"]["value"].Value<string>();
@@ -18,6 +19,7 @@ namespace IB.Api.Client.Endpoint.Accounts.Response
             AvailableFunds = data["availablefunds"]["amount"].Value<double>();
             BuyingPower = data["buyingpower"]["amount"].Value<double>();
             ExcessLiquidity = data["excessliquidity"]["amount"].Value<double>();
+            Cash = data["totalcashvalue"]["amount"].Value<double>();
         }
     }
 }

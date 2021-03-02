@@ -10,7 +10,7 @@ namespace IB.Api.Client.Endpoint.Orders.Request
         public string AccountId { get; set; }
 
         [JsonProperty("conid")]
-        public int ContractId { get; set; }
+        public long ContractId { get; set; }
 
         [JsonProperty("secType")]
         public string SecType { get; set; }

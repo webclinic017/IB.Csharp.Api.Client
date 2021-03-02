@@ -21,7 +21,7 @@ namespace IB.Api.Client.Endpoint.Portfolio.Model
         public long PositionValue { get; set; }
 
         [JsonProperty("mktPrice")]
-        public string MktPrice { get; set; }
+        public double MktPrice { get; set; }
 
         [JsonProperty("mktValue")]
         public string MktValue { get; set; }

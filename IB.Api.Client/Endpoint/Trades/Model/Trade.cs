@@ -23,10 +23,10 @@ namespace IB.Api.Client.Endpoint.Trades.Model
         public long TradeTimeR { get; set; }
 
         [JsonProperty("size")]
-        public string Size { get; set; }
+        public double Size { get; set; }
 
         [JsonProperty("price")]
-        public string Price { get; set; }
+        public double Price { get; set; }
 
         [JsonProperty("submitter")]
         public string Submitter { get; set; }
@@ -53,7 +53,7 @@ namespace IB.Api.Client.Endpoint.Trades.Model
         public string SecType { get; set; }
 
         [JsonProperty("conidex")]
-        public string Conidex { get; set; }
+        public long Conidex { get; set; }
 
         [JsonProperty("position")]
         public string Position { get; set; }

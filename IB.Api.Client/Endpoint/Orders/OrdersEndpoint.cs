@@ -11,20 +11,8 @@ namespace IB.Api.Client.Endpoint.Orders
         {
             return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
         }
-        public PlaceOrderResponse PlaceMarketOrder(string accountId, int contractId, double quantity)
+        public PlaceOrderResponse PlaceMarketOrder(string accountId, OrderRequest request)
         {
-            var request = new OrderRequest
-            {
-                AccountId = accountId,
-                ContractId = contractId,
-                OrderType = OrderType.MKT,
-                ListingExchange = Exchange.SMART,
-                OutsideRegularHours = false,
-                Side = Side.BUY,
-                Quantity = quantity,
-                Expiry = TimeInForce.GTC,
-                AllocationMethod = AllocationMethod.AvailableEquity
-            };
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<PlaceOrderResponse>($"/iserver/account/{accountId}/order", payload, true);
         }
@@ -44,6 +32,10 @@ namespace IB.Api.Client.Endpoint.Orders
             };
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload, true);
+        }
+        public CancelOrderResponse CancelOrder(string accountId, string orderId)
+        {
+            return DeleteApiResponse<CancelOrderResponse>($"/iserver/account/{accountId}/order/{orderId}");
         }
     }
 }
