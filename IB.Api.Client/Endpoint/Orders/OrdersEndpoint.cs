@@ -35,7 +35,11 @@ namespace IB.Api.Client.Endpoint.Orders
         }
         public CancelOrderResponse CancelOrder(string accountId, string orderId)
         {
-            return DeleteApiResponse<CancelOrderResponse>($"/iserver/account/{accountId}/order/{orderId}");
+            return DeleteApiResponse<CancelOrderResponse>($"/iserver/account/{accountId}/order/{orderId}", true);
+        }
+        public PlaceOrderReplyResponse PlaceOrderReply(string replyId, string payload)
+        {
+            return PostApiResponse<PlaceOrderReplyResponse>($"/iserver/reply/{replyId}", payload, true);
         }
     }
 }
