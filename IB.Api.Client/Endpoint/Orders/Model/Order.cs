@@ -8,9 +8,6 @@ namespace IB.Api.Client.Endpoint.Orders.Model
         [JsonProperty("acct")]
         public string Acct { get; set; }
 
-        [JsonProperty("exchange")]
-        public string Exchange { get; set; }
-
         [JsonProperty("conid")]
         public long Conid { get; set; }
 
@@ -50,14 +47,17 @@ namespace IB.Api.Client.Endpoint.Orders.Model
         [JsonProperty("status")]
         public OrderStatus Status { get; set; }
 
+        [JsonProperty("avgPrice")]
+        public string AvgPrice { get; set; }
+
         [JsonProperty("origOrderType")]
         public string OrigOrderType { get; set; }
 
         [JsonProperty("supportsTaxOpt")]
-        public long SupportsTaxOpt { get; set; }
+        public string SupportsTaxOpt { get; set; }
 
         [JsonProperty("lastExecutionTime")]
-        public long LastExecutionTime { get; set; }
+        public string LastExecutionTime { get; set; }
 
         [JsonProperty("lastExecutionTime_r")]
         public long LastExecutionTimeR { get; set; }
@@ -65,17 +65,11 @@ namespace IB.Api.Client.Endpoint.Orders.Model
         [JsonProperty("orderType")]
         public string OrderType { get; set; }
 
-        [JsonProperty("order_ref")]
-        public string OrderRef { get; set; }
-
         [JsonProperty("side")]
         public string Side { get; set; }
 
         [JsonProperty("timeInForce")]
-        public TimeInForce TimeInForce { get; set; }
-
-        [JsonProperty("price")]
-        public long Price { get; set; }
+        public string TimeInForce { get; set; }
 
         [JsonProperty("bgColor")]
         public string BgColor { get; set; }

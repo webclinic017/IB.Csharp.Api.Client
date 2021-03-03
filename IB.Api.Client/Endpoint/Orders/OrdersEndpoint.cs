@@ -9,12 +9,12 @@ namespace IB.Api.Client.Endpoint.Orders
     {
         public OrdersResponse Orders()
         {
-            return GetApiResponse<OrdersResponse>($"/iserver/account/orders");
+            return GetApiResponse<OrdersResponse>($"/iserver/account/orders", true);
         }
         public PlaceOrderResponse PlaceMarketOrder(string accountId, OrderRequest request)
         {
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<PlaceOrderResponse>($"/iserver/account/{accountId}/order", payload, true);
+            return PostApiResponse<PlaceOrderResponse>($"/iserver/account/{accountId}/order", payload);
         }
         public OrderPreviewResponse MarketOrderPreview(string accountId, int contractId, double quantity)
         {
@@ -31,11 +31,11 @@ namespace IB.Api.Client.Endpoint.Orders
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload, true);
+            return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload);
         }
         public CancelOrderResponse CancelOrder(string accountId, string orderId)
         {
-            return DeleteApiResponse<CancelOrderResponse>($"/iserver/account/{accountId}/order/{orderId}", true);
+            return DeleteApiResponse<CancelOrderResponse>($"/iserver/account/{accountId}/order/{orderId}");
         }
         public PlaceOrderReplyResponse PlaceOrderReply(string replyId, bool confirmed)
         {
@@ -44,7 +44,7 @@ namespace IB.Api.Client.Endpoint.Orders
                 Confirmed = confirmed
             };
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<PlaceOrderReplyResponse>($"/iserver/reply/{replyId}", payload, true);
+            return PostApiResponse<PlaceOrderReplyResponse>($"/iserver/reply/{replyId}", payload);
         }
     }
 }
