@@ -60,7 +60,7 @@ namespace IB.Api.Client.Endpoint.Orders.Model
         public string LastExecutionTime { get; set; }
 
         [JsonProperty("lastExecutionTime_r")]
-        public long LastExecutionTimeR { get; set; }
+        public string LastExecutionTimeR { get; set; }
 
         [JsonProperty("orderType")]
         public string OrderType { get; set; }

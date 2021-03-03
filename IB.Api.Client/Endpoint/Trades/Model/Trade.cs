@@ -20,7 +20,7 @@ namespace IB.Api.Client.Endpoint.Trades.Model
         public string TradeTime { get; set; }
 
         [JsonProperty("trade_time_r")]
-        public long TradeTimeR { get; set; }
+        public string TradeTimeR { get; set; }
 
         [JsonProperty("size")]
         public double Size { get; set; }
