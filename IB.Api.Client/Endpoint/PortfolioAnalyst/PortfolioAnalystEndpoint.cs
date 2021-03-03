@@ -17,7 +17,7 @@ namespace IB.Api.Client.Endpoint.PortfolioAnalyst
                 ConIds = contractIds
             };
             var payload = JsonConvert.SerializeObject(request);
-            return PostApiResponse<TransactionHistoryResponse>("/pa/transactions", payload, true);
+            return PostApiResponse<TransactionHistoryResponse>("/pa/transactions", payload);
         }
     }
 }
