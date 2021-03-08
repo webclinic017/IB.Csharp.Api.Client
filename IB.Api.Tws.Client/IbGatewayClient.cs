@@ -3,65 +3,77 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using IB.Api.Tws.Client.Handler;
 
 namespace IB.Api.Tws.Client
 {
     public class IbGatewayClient : EWrapper
     {
-        public Dictionary<string, string> Account;
-        private int nextOrderId;
-        EClientSocket clientSocket;
-        public readonly EReaderSignal Signal;
+        private Dictionary<string, string> _accountDictionary;   
+        private readonly EReaderSignal _signal;
         private string _accountId;
+        private EClientSocket _clientSocket;
+        private int NextOrderId;
+        public string BboExchange { get; set; }
 
         public IbGatewayClient(string address, int port, int clientId, string accountId)
         {
             _accountId = accountId;
-            Signal = new EReaderMonitorSignal();
-            clientSocket = new EClientSocket(this, Signal);
-            Account = new Dictionary<string, string>();
+            _signal = new EReaderMonitorSignal();
+            _clientSocket = new EClientSocket(this, _signal);
+            _accountDictionary = new Dictionary<string, string>();
 
-            ClientSocket.eConnect(address, port, clientId);
-            var reader = new EReader(ClientSocket, Signal);
+            _clientSocket.eConnect(address, port, clientId);
+            var reader = new EReader(_clientSocket, _signal);
             reader.Start();
             new Thread(() =>
             {
-                while (ClientSocket.IsConnected())
+                while (_clientSocket.IsConnected())
                 {
-                    Signal.waitForSignal();
+                    _signal.waitForSignal();
                     reader.processMsgs();
                 }
             })
             { IsBackground = true }.Start();
         }
+        #region Account
+        public event EventHandler<Account> OnAccountReceived;
+        private void OnAccountReceivedHandler(Dictionary<string,string> accountDictionary)
+        {
+            OnAccountReceived?.Invoke(this, new Account(accountDictionary));
+        }
         public void SubscribeToAccountUpdates()
         {
-            ClientSocket.reqAccountUpdates(true, _accountId); 
+            _clientSocket.reqAccountUpdates(true, _accountId); 
         }
         public void UnsubscribeFromAccountUpdates()
         {
-            ClientSocket.reqAccountUpdates(false, _accountId); 
+            _clientSocket.reqAccountUpdates(false, _accountId); 
         }
-        public EClientSocket ClientSocket
+        public virtual void updateAccountValue(string key, string value, string currency, string accountName)
         {
-            get { return clientSocket; }
-            set { clientSocket = value; }
+            _accountDictionary[key] = value;
         }
-
-        public int NextOrderId
+        public virtual void updateAccountTime(string timestamp)
         {
-            get { return nextOrderId; }
-            set { nextOrderId = value; }
+            _accountDictionary["UpdateAccountTime"] = timestamp;
         }
+        public virtual void accountDownloadEnd(string account)
+        {
+            OnAccountReceivedHandler(_accountDictionary);
+        }
+        #endregion
 
-        public string BboExchange { get; private set; }
+        public void Disconnect()
+        {
+            _clientSocket.eDisconnect();
+        }
 
         public virtual void error(Exception e)
         {
             Console.WriteLine("Exception thrown: "+e);
             throw e;
-        }
-        
+        }        
         public virtual void error(string str)
         {
             Console.WriteLine("Error: "+str+"\n");
@@ -129,29 +141,13 @@ namespace IB.Api.Tws.Client
         public virtual void accountSummaryEnd(int reqId)
         {
             Console.WriteLine("AccountSummaryEnd. Req Id: "+reqId+"\n");
-        }
-        public virtual void updateAccountValue(string key, string value, string currency, string accountName)
-        {
-            Account[key] = value;
-        }
+        }        
         public virtual void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
         {
             Console.WriteLine("UpdatePortfolio. " + contract.Symbol + ", " + contract.SecType + " @ " + contract.Exchange
                 + ": Position: " + position + ", MarketPrice: " + marketPrice + ", MarketValue: " + marketValue + ", AverageCost: " + averageCost
                 + ", UnrealizedPNL: " + unrealizedPNL + ", RealizedPNL: " + realizedPNL + ", AccountName: " + accountName);
-        }
-        public virtual void updateAccountTime(string timestamp)
-        {
-            Account["UpdateAccountTime"] = timestamp;
-        }
-        public virtual void accountDownloadEnd(string account)
-        {
-            Console.WriteLine("Account values:");
-            foreach (var item in Account)
-            {
-                Console.WriteLine($"{item.Key}:{item.Value}");
-            }
-        }
+        }        
         public virtual void orderStatus(int orderId, string status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
         {
             Console.WriteLine("OrderStatus. Id: " + orderId + ", Status: " + status + ", Filled: " + filled + ", Remaining: " + remaining
@@ -394,8 +390,8 @@ namespace IB.Api.Tws.Client
         }
         public void connectAck()
         {
-            if (ClientSocket.AsyncEConnect)
-                ClientSocket.startApi();
+            if (_clientSocket.AsyncEConnect)
+                _clientSocket.startApi();
         }
         public void softDollarTiers(int reqId, SoftDollarTier[] tiers)
         {
