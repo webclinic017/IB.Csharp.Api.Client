@@ -7,36 +7,11 @@ using IB.Api.Tws.Client.Handler;
 
 namespace IB.Api.Tws.Client
 {
-    public class IbGatewayClient : EWrapper
+
+    //Accounts
+    public partial class IbGatewayClient
     {
-        private Dictionary<string, string> _accountDictionary;   
-        private readonly EReaderSignal _signal;
-        private string _accountId;
-        private EClientSocket _clientSocket;
-        private int NextOrderId;
-        public string BboExchange { get; set; }
-
-        public IbGatewayClient(string address, int port, int clientId, string accountId)
-        {
-            _accountId = accountId;
-            _signal = new EReaderMonitorSignal();
-            _clientSocket = new EClientSocket(this, _signal);
-            _accountDictionary = new Dictionary<string, string>();
-
-            _clientSocket.eConnect(address, port, clientId);
-            var reader = new EReader(_clientSocket, _signal);
-            reader.Start();
-            new Thread(() =>
-            {
-                while (_clientSocket.IsConnected())
-                {
-                    _signal.waitForSignal();
-                    reader.processMsgs();
-                }
-            })
-            { IsBackground = true }.Start();
-        }
-        #region Account
+        private Dictionary<string, string> _accountDictionary; 
         public event EventHandler<Account> OnAccountReceived;
         private void OnAccountReceivedHandler(Dictionary<string,string> accountDictionary)
         {
@@ -62,8 +37,71 @@ namespace IB.Api.Tws.Client
         {
             OnAccountReceivedHandler(_accountDictionary);
         }
-        #endregion
+    }
 
+    //Positions
+    public partial class IbGatewayClient
+    {
+        public event EventHandler<Position> OnPortfolioUpdateReceived;
+        private void OnPortfolioUpdateReceivedHandler(Contract contract, double position, double marketPrice, double unrealizedPNL)
+        {
+            OnPortfolioUpdateReceived?.Invoke(this, new Position(contract, position, marketPrice, unrealizedPNL));
+        }
+        public void SubscribeToPositionUpdates()
+        {
+            _clientSocket.reqPositions();
+        }
+        public void UnsubscribeFromPositionUpdates()
+        {
+            _clientSocket.cancelPositions();
+        }        
+        public virtual void position(string account, Contract contract, double pos, double avgCost)
+        {
+            Console.WriteLine("Position. "+account+" - Symbol: "+contract.Symbol+", SecType: "+contract.SecType+", Currency: "+contract.Currency+", Position: "+pos+", Avg cost: "+avgCost);
+        }
+        public virtual void positionEnd()
+        {
+            Console.WriteLine("PositionEnd \n");
+        }
+        public virtual void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
+        {
+            OnPortfolioUpdateReceivedHandler(contract, position, marketPrice, unrealizedPNL);
+        }
+    }
+
+    public partial class IbGatewayClient : EWrapper
+    {          
+        private readonly EReaderSignal _signal;
+        private string _accountId;
+        private EClientSocket _clientSocket;
+        private int NextOrderId;
+        public string BboExchange { get; set; }
+
+        public IbGatewayClient(string address, int port, int clientId, string accountId)
+        {
+            _accountId = accountId;
+            _signal = new EReaderMonitorSignal();
+            _clientSocket = new EClientSocket(this, _signal);
+            _accountDictionary = new Dictionary<string, string>();
+
+            _clientSocket.eConnect(address, port, clientId);
+            var reader = new EReader(_clientSocket, _signal);
+            reader.Start();
+            new Thread(() =>
+            {
+                while (_clientSocket.IsConnected())
+                {
+                    _signal.waitForSignal();
+                    reader.processMsgs();
+                }
+            })
+            { IsBackground = true }.Start();
+        }    
+
+        public void SubscribeToMarketData(int id, Contract contract)
+        {
+            _clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
+        }
         public void Disconnect()
         {
             _clientSocket.eDisconnect();
@@ -141,13 +179,7 @@ namespace IB.Api.Tws.Client
         public virtual void accountSummaryEnd(int reqId)
         {
             Console.WriteLine("AccountSummaryEnd. Req Id: "+reqId+"\n");
-        }        
-        public virtual void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
-        {
-            Console.WriteLine("UpdatePortfolio. " + contract.Symbol + ", " + contract.SecType + " @ " + contract.Exchange
-                + ": Position: " + position + ", MarketPrice: " + marketPrice + ", MarketValue: " + marketValue + ", AverageCost: " + averageCost
-                + ", UnrealizedPNL: " + unrealizedPNL + ", RealizedPNL: " + realizedPNL + ", AccountName: " + accountName);
-        }        
+        }                      
         public virtual void orderStatus(int orderId, string status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
         {
             Console.WriteLine("OrderStatus. Id: " + orderId + ", Status: " + status + ", Filled: " + filled + ", Remaining: " + remaining
@@ -300,14 +332,7 @@ namespace IB.Api.Tws.Client
         {
             Console.WriteLine("News Bulletins. "+msgId+" - Type: "+msgType+", Message: "+message+", Exchange of Origin: "+origExchange+"\n");
         }
-        public virtual void position(string account, Contract contract, double pos, double avgCost)
-        {
-            Console.WriteLine("Position. "+account+" - Symbol: "+contract.Symbol+", SecType: "+contract.SecType+", Currency: "+contract.Currency+", Position: "+pos+", Avg cost: "+avgCost);
-        }
-        public virtual void positionEnd()
-        {
-            Console.WriteLine("PositionEnd \n");
-        }
+        
         public virtual void realtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double WAP, int count)
         {
             Console.WriteLine("RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open + ", High: " + high + ", Low: " + low + ", Close: " + close + ", Volume: " + volume + ", Count: " + count + ", WAP: " + WAP);
