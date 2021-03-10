@@ -7,7 +7,6 @@ using IB.Api.Tws.Client.Handler;
 
 namespace IB.Api.Tws.Client
 {
-
     //Accounts
     public partial class IbGatewayClient
     {
@@ -69,6 +68,69 @@ namespace IB.Api.Tws.Client
         }
     }
 
+    //Market Data
+    public partial class IbGatewayClient
+    {
+        public event EventHandler<Price> OnPriceUpdateReceived;
+        private void OnPriceUpdateReceivedHandler(Price price)
+        {
+            OnPriceUpdateReceived?.Invoke(this, price);
+        }
+        public Dictionary<int, Price> Prices = new Dictionary<int, Price> ();
+        public void SubscribeToMarketData(int id, Contract contract)
+        {
+            _clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
+            Prices[id] = new Price
+            {
+                Id = id,
+                Symbol = contract.Symbol
+            };
+        }
+        public void UnsubscribeFromMarketData(int id)
+        {
+            _clientSocket.cancelMktData(id);
+        }
+        public virtual void tickPrice(int tickerId, int field, double price, TickAttrib attribs)
+        {
+            var priceItem = Prices[tickerId];
+            switch (field)
+            {
+                case TickType.BID:
+                    {
+                        priceItem.Bid = price;
+                        break;
+                    }
+                case TickType.ASK:
+                    {
+                        priceItem.Ask = price;
+                        break;
+                    }
+            }
+            Prices[tickerId] = priceItem;
+            OnPriceUpdateReceivedHandler(priceItem);
+        }
+        public virtual void tickSize(int tickerId, int field, int size)
+        {
+            //Console.WriteLine("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
+        }
+        public virtual void tickString(int tickerId, int tickType, string value)
+        {
+            //Console.WriteLine("Tick string. Ticker Id:" + tickerId + ", Type: " + tickType + ", Value: " + value);
+        }
+        public virtual void tickGeneric(int tickerId, int field, double value)
+        {
+            //Console.WriteLine("Tick Generic. Ticker Id:" + tickerId + ", Field: " + field + ", Value: " + value);
+        }
+        public virtual void tickEFP(int tickerId, int tickType, double basisPoints, string formattedBasisPoints, double impliedFuture, int holdDays, string futureLastTradeDate, double dividendImpact, double dividendsToLastTradeDate)
+        {
+            //Console.WriteLine("TickEFP. "+tickerId+", Type: "+tickType+", BasisPoints: "+basisPoints+", FormattedBasisPoints: "+formattedBasisPoints+", ImpliedFuture: "+impliedFuture+", HoldDays: "+holdDays+", FutureLastTradeDate: "+futureLastTradeDate+", DividendImpact: "+dividendImpact+", DividendsToLastTradeDate: "+dividendsToLastTradeDate);
+        }
+        public virtual void tickSnapshotEnd(int tickerId)
+        {
+            //Console.WriteLine("TickSnapshotEnd: "+tickerId);
+        }
+    }
+
     public partial class IbGatewayClient : EWrapper
     {          
         private readonly EReaderSignal _signal;
@@ -97,11 +159,7 @@ namespace IB.Api.Tws.Client
             })
             { IsBackground = true }.Start();
         }    
-
-        public void SubscribeToMarketData(int id, Contract contract)
-        {
-            _clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
-        }
+        
         public void Disconnect()
         {
             _clientSocket.eDisconnect();
@@ -128,32 +186,7 @@ namespace IB.Api.Tws.Client
         public virtual void currentTime(long time) 
         {
             Console.WriteLine("Current Time: "+time+"\n");
-        }
-        public virtual void tickPrice(int tickerId, int field, double price, TickAttrib attribs) 
-        {
-            Console.WriteLine("Tick Price. Ticker Id:"+tickerId+", Field: "+field+", Price: "+price+", CanAutoExecute: "+attribs.CanAutoExecute + 
-                ", PastLimit: " + attribs.PastLimit + ", PreOpen: " + attribs.PreOpen);
-        }
-        public virtual void tickSize(int tickerId, int field, int size)
-        {
-            Console.WriteLine("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
-        }
-        public virtual void tickString(int tickerId, int tickType, string value)
-        {
-            Console.WriteLine("Tick string. Ticker Id:" + tickerId + ", Type: " + tickType + ", Value: " + value);
-        }
-        public virtual void tickGeneric(int tickerId, int field, double value)
-        {
-            Console.WriteLine("Tick Generic. Ticker Id:" + tickerId + ", Field: " + field + ", Value: " + value);
-        }
-        public virtual void tickEFP(int tickerId, int tickType, double basisPoints, string formattedBasisPoints, double impliedFuture, int holdDays, string futureLastTradeDate, double dividendImpact, double dividendsToLastTradeDate)
-        {
-            Console.WriteLine("TickEFP. "+tickerId+", Type: "+tickType+", BasisPoints: "+basisPoints+", FormattedBasisPoints: "+formattedBasisPoints+", ImpliedFuture: "+impliedFuture+", HoldDays: "+holdDays+", FutureLastTradeDate: "+futureLastTradeDate+", DividendImpact: "+dividendImpact+", DividendsToLastTradeDate: "+dividendsToLastTradeDate);
-        }
-        public virtual void tickSnapshotEnd(int tickerId)
-        {
-            Console.WriteLine("TickSnapshotEnd: "+tickerId);
-        }
+        }        
         public virtual void nextValidId(int orderId) 
         {
             Console.WriteLine("Next Valid Id: "+orderId);
