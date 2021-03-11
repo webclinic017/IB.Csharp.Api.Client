@@ -18,7 +18,6 @@ namespace IB.Api.Client.Endpoint
         {
             OnApiResponse?.Invoke(this, apiResponse);
         }
-
         protected BaseEndpoint()
         {
             ServicePointManager.ServerCertificateValidationCallback =
