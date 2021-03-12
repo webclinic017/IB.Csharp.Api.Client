@@ -3,26 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using IB.Api.Tws.Client.Types;
 using IB.Api.Tws.Client.Handler;
+using IB.Api.Tws.Client.Helper;
 
 namespace IB.Api.Tws.Client
 {
     //Accounts
     public partial class IbGatewayClient
     {
-        private Dictionary<string, string> _accountDictionary; 
+        private Dictionary<string, string> _accountDictionary;
         public event EventHandler<Account> OnAccountReceived;
-        private void OnAccountReceivedHandler(Dictionary<string,string> accountDictionary)
+        private void OnAccountReceivedHandler(Dictionary<string, string> accountDictionary)
         {
             OnAccountReceived?.Invoke(this, new Account(accountDictionary));
         }
         public void SubscribeToAccountUpdates()
         {
-            _clientSocket.reqAccountUpdates(true, _accountId); 
+            _clientSocket.reqAccountUpdates(true, _accountId);
         }
         public void UnsubscribeFromAccountUpdates()
         {
-            _clientSocket.reqAccountUpdates(false, _accountId); 
+            _clientSocket.reqAccountUpdates(false, _accountId);
         }
         public virtual void updateAccountValue(string key, string value, string currency, string accountName)
         {
@@ -53,10 +55,10 @@ namespace IB.Api.Tws.Client
         public void UnsubscribeFromPositionUpdates()
         {
             _clientSocket.cancelPositions();
-        }        
+        }
         public virtual void position(string account, Contract contract, double pos, double avgCost)
         {
-            Console.WriteLine("Position. "+account+" - Symbol: "+contract.Symbol+", SecType: "+contract.SecType+", Currency: "+contract.Currency+", Position: "+pos+", Avg cost: "+avgCost);
+            Console.WriteLine("Position. " + account + " - Symbol: " + contract.Symbol + ", SecType: " + contract.SecType + ", Currency: " + contract.Currency + ", Position: " + pos + ", Avg cost: " + avgCost);
         }
         public virtual void positionEnd()
         {
@@ -76,7 +78,7 @@ namespace IB.Api.Tws.Client
         {
             OnPriceUpdateReceived?.Invoke(this, price);
         }
-        public Dictionary<int, Price> Prices = new Dictionary<int, Price> ();
+        public Dictionary<int, Price> Prices = new Dictionary<int, Price>();
         public void SubscribeToMarketData(int id, Contract contract)
         {
             _clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
@@ -131,8 +133,16 @@ namespace IB.Api.Tws.Client
         }
     }
 
+    //Orders
+    public partial class IbGatewayClient
+    {
+        public void OpenMarketOrder(OrderAction orderAction, Contract contract, double quantity)
+        {
+            _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.MarketOrder(orderAction, quantity));
+        }
+    }
     public partial class IbGatewayClient : EWrapper
-    {          
+    {
         private readonly EReaderSignal _signal;
         private string _accountId;
         private EClientSocket _clientSocket;
@@ -158,8 +168,8 @@ namespace IB.Api.Tws.Client
                 }
             })
             { IsBackground = true }.Start();
-        }    
-        
+        }
+
         public void Disconnect()
         {
             _clientSocket.eDisconnect();
@@ -167,12 +177,12 @@ namespace IB.Api.Tws.Client
 
         public virtual void error(Exception e)
         {
-            Console.WriteLine("Exception thrown: "+e);
+            Console.WriteLine("Exception thrown: " + e);
             throw e;
-        }        
+        }
         public virtual void error(string str)
         {
-            Console.WriteLine("Error: "+str+"\n");
+            Console.WriteLine("Error: " + str + "\n");
         }
         public virtual void error(int id, int errorCode, string errorMsg)
         {
@@ -182,23 +192,23 @@ namespace IB.Api.Tws.Client
         {
             Console.WriteLine("Connection closed.\n");
         }
-        
-        public virtual void currentTime(long time) 
+
+        public virtual void currentTime(long time)
         {
-            Console.WriteLine("Current Time: "+time+"\n");
-        }        
-        public virtual void nextValidId(int orderId) 
+            Console.WriteLine("Current Time: " + time + "\n");
+        }
+        public virtual void nextValidId(int orderId)
         {
-            Console.WriteLine("Next Valid Id: "+orderId);
+            Console.WriteLine("Next Valid Id: " + orderId);
             NextOrderId = orderId;
         }
         public virtual void deltaNeutralValidation(int reqId, DeltaNeutralContract deltaNeutralContract)
         {
             Console.WriteLine("DeltaNeutralValidation. " + reqId + ", ConId: " + deltaNeutralContract.ConId + ", Delta: " + deltaNeutralContract.Delta + ", Price: " + deltaNeutralContract.Price);
         }
-        public virtual void managedAccounts(string accountsList) 
+        public virtual void managedAccounts(string accountsList)
         {
-            Console.WriteLine("Account list: "+accountsList);
+            Console.WriteLine("Account list: " + accountsList);
         }
         public virtual void tickOptionComputation(int tickerId, int field, double impliedVolatility, double delta, double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice)
         {
@@ -211,8 +221,8 @@ namespace IB.Api.Tws.Client
         }
         public virtual void accountSummaryEnd(int reqId)
         {
-            Console.WriteLine("AccountSummaryEnd. Req Id: "+reqId+"\n");
-        }                      
+            Console.WriteLine("AccountSummaryEnd. Req Id: " + reqId + "\n");
+        }
         public virtual void orderStatus(int orderId, string status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
         {
             Console.WriteLine("OrderStatus. Id: " + orderId + ", Status: " + status + ", Filled: " + filled + ", Remaining: " + remaining
@@ -220,8 +230,8 @@ namespace IB.Api.Tws.Client
         }
         public virtual void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
         {
-            Console.WriteLine("OpenOrder. PermID: " + order.PermId + ", ClientId: " + order.ClientId + ", OrderId: " + orderId + ", Account: " + order.Account + 
-                ", Symbol: " + contract.Symbol + ", SecType: " + contract.SecType + " , Exchange: " + contract.Exchange + ", Action: " + order.Action + ", OrderType: " + order.OrderType + 
+            Console.WriteLine("OpenOrder. PermID: " + order.PermId + ", ClientId: " + order.ClientId + ", OrderId: " + orderId + ", Account: " + order.Account +
+                ", Symbol: " + contract.Symbol + ", SecType: " + contract.SecType + " , Exchange: " + contract.Exchange + ", Action: " + order.Action + ", OrderType: " + order.OrderType +
                 ", TotalQty: " + order.TotalQuantity + ", CashQty: " + order.CashQty + ", LmtPrice: " + order.LmtPrice + ", AuxPrice: " + order.AuxPrice + ", Status: " + orderState.Status);
         }
         public virtual void openOrderEnd()
@@ -279,7 +289,8 @@ namespace IB.Api.Tws.Client
         }
         public void printContractDetailsSecIdList(List<TagValue> secIdList)
         {
-            if (secIdList != null && secIdList.Count > 0) {
+            if (secIdList != null && secIdList.Count > 0)
+            {
                 Console.Write("\tSecIdList: {");
                 foreach (TagValue tagValue in secIdList)
                 {
@@ -327,23 +338,23 @@ namespace IB.Api.Tws.Client
         }
         public virtual void contractDetailsEnd(int reqId)
         {
-            Console.WriteLine("ContractDetailsEnd. "+reqId+"\n");
+            Console.WriteLine("ContractDetailsEnd. " + reqId + "\n");
         }
         public virtual void execDetails(int reqId, Contract contract, Execution execution)
         {
-            Console.WriteLine("ExecDetails. "+reqId+" - "+contract.Symbol+", "+contract.SecType+", "+contract.Currency+" - "+execution.ExecId+", "+execution.OrderId+", "+execution.Shares + ", " + execution.LastLiquidity);
+            Console.WriteLine("ExecDetails. " + reqId + " - " + contract.Symbol + ", " + contract.SecType + ", " + contract.Currency + " - " + execution.ExecId + ", " + execution.OrderId + ", " + execution.Shares + ", " + execution.LastLiquidity);
         }
         public virtual void execDetailsEnd(int reqId)
         {
-            Console.WriteLine("ExecDetailsEnd. "+reqId+"\n");
+            Console.WriteLine("ExecDetailsEnd. " + reqId + "\n");
         }
         public virtual void commissionReport(CommissionReport commissionReport)
         {
-            Console.WriteLine("CommissionReport. "+commissionReport.ExecId+" - "+commissionReport.Commission+" "+commissionReport.Currency+" RPNL "+commissionReport.RealizedPNL);
+            Console.WriteLine("CommissionReport. " + commissionReport.ExecId + " - " + commissionReport.Commission + " " + commissionReport.Currency + " RPNL " + commissionReport.RealizedPNL);
         }
         public virtual void fundamentalData(int reqId, string data)
         {
-            Console.WriteLine("FundamentalData. " + reqId + "" + data+"\n");
+            Console.WriteLine("FundamentalData. " + reqId + "" + data + "\n");
         }
         public virtual void historicalData(int reqId, Bar bar)
         {
@@ -351,7 +362,7 @@ namespace IB.Api.Tws.Client
         }
         public virtual void marketDataType(int reqId, int marketDataType)
         {
-            Console.WriteLine("MarketDataType. "+reqId+", Type: "+marketDataType+"\n");
+            Console.WriteLine("MarketDataType. " + reqId + ", Type: " + marketDataType + "\n");
         }
         public virtual void updateMktDepth(int tickerId, int position, int operation, int side, double price, int size)
         {
@@ -363,29 +374,29 @@ namespace IB.Api.Tws.Client
         }
         public virtual void updateNewsBulletin(int msgId, int msgType, String message, String origExchange)
         {
-            Console.WriteLine("News Bulletins. "+msgId+" - Type: "+msgType+", Message: "+message+", Exchange of Origin: "+origExchange+"\n");
+            Console.WriteLine("News Bulletins. " + msgId + " - Type: " + msgType + ", Message: " + message + ", Exchange of Origin: " + origExchange + "\n");
         }
-        
+
         public virtual void realtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double WAP, int count)
         {
             Console.WriteLine("RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open + ", High: " + high + ", Low: " + low + ", Close: " + close + ", Volume: " + volume + ", Count: " + count + ", WAP: " + WAP);
         }
         public virtual void scannerParameters(string xml)
         {
-            Console.WriteLine("ScannerParameters. "+xml+"\n");
+            Console.WriteLine("ScannerParameters. " + xml + "\n");
         }
         public virtual void scannerData(int reqId, int rank, ContractDetails contractDetails, string distance, string benchmark, string projection, string legsStr)
         {
-            Console.WriteLine("ScannerData. "+reqId+" - Rank: "+rank+", Symbol: "+contractDetails.Contract.Symbol+", SecType: "+contractDetails.Contract.SecType+", Currency: "+contractDetails.Contract.Currency
-                +", Distance: "+distance+", Benchmark: "+benchmark+", Projection: "+projection+", Legs String: "+legsStr);
+            Console.WriteLine("ScannerData. " + reqId + " - Rank: " + rank + ", Symbol: " + contractDetails.Contract.Symbol + ", SecType: " + contractDetails.Contract.SecType + ", Currency: " + contractDetails.Contract.Currency
+                + ", Distance: " + distance + ", Benchmark: " + benchmark + ", Projection: " + projection + ", Legs String: " + legsStr);
         }
         public virtual void scannerDataEnd(int reqId)
         {
-            Console.WriteLine("ScannerDataEnd. "+reqId);
+            Console.WriteLine("ScannerDataEnd. " + reqId);
         }
         public virtual void receiveFA(int faDataType, string faXmlData)
         {
-            Console.WriteLine("Receing FA: "+faDataType+" - "+faXmlData);
+            Console.WriteLine("Receing FA: " + faDataType + " - " + faXmlData);
         }
         public virtual void bondContractDetails(int requestId, ContractDetails contractDetails)
         {
@@ -395,7 +406,7 @@ namespace IB.Api.Tws.Client
         }
         public virtual void historicalDataEnd(int reqId, string startDate, string endDate)
         {
-            Console.WriteLine("HistoricalDataEnd - "+reqId+" from "+startDate+" to "+endDate);
+            Console.WriteLine("HistoricalDataEnd - " + reqId + " from " + startDate + " to " + endDate);
         }
         public virtual void verifyMessageAPI(string apiData)
         {
@@ -469,7 +480,7 @@ namespace IB.Api.Tws.Client
                 Console.WriteLine("Account ID: {0}, Family Code Str: {1}", familyCode.AccountID, familyCode.FamilyCodeStr);
             }
         }
-        public void symbolSamples(int reqId, ContractDescription[] contractDescriptions) 
+        public void symbolSamples(int reqId, ContractDescription[] contractDescriptions)
         {
             string derivSecTypes;
             Console.WriteLine("Symbol Samples. Request Id: {0}", reqId);
@@ -482,8 +493,8 @@ namespace IB.Api.Tws.Client
                     derivSecTypes += derivSecType;
                     derivSecTypes += " ";
                 }
-                Console.WriteLine("Contract: conId - {0}, symbol - {1}, secType - {2}, primExchange - {3}, currency - {4}, derivativeSecTypes - {5}", 
-                    contractDescription.Contract.ConId, contractDescription.Contract.Symbol, contractDescription.Contract.SecType, 
+                Console.WriteLine("Contract: conId - {0}, symbol - {1}, secType - {2}, primExchange - {3}, currency - {4}, derivativeSecTypes - {5}",
+                    contractDescription.Contract.ConId, contractDescription.Contract.Symbol, contractDescription.Contract.SecType,
                     contractDescription.Contract.PrimaryExch, contractDescription.Contract.Currency, derivSecTypes);
             }
         }
@@ -493,8 +504,8 @@ namespace IB.Api.Tws.Client
 
             foreach (var depthMktDataDescription in depthMktDataDescriptions)
             {
-                Console.WriteLine("Depth Market Data Description: Exchange: {0}, Security Type: {1}, Listing Exch: {2}, Service Data Type: {3}, Agg Group: {4}", 
-                    depthMktDataDescription.Exchange, depthMktDataDescription.SecType, 
+                Console.WriteLine("Depth Market Data Description: Exchange: {0}, Security Type: {1}, Listing Exch: {2}, Service Data Type: {3}, Agg Group: {4}",
+                    depthMktDataDescription.Exchange, depthMktDataDescription.SecType,
                     depthMktDataDescription.ListingExch, depthMktDataDescription.ServiceDataType,
                     depthMktDataDescription.AggGroup != Int32.MaxValue ? depthMktDataDescription.AggGroup.ToString() : ""
                     );
@@ -538,10 +549,12 @@ namespace IB.Api.Tws.Client
         public void newsArticle(int requestId, int articleType, string articleText)
         {
             Console.WriteLine("News Article. Request Id: {0}, ArticleType: {1}", requestId, articleType);
-            if (articleType == 0) {
+            if (articleType == 0)
+            {
                 Console.WriteLine("News Article Text: {0}", articleText);
             }
-            else if (articleType == 1) {
+            else if (articleType == 1)
+            {
                 Console.WriteLine("News Article Text: article text is binary/pdf and cannot be displayed");
             }
         }
@@ -574,10 +587,10 @@ namespace IB.Api.Tws.Client
         {
             Console.WriteLine("Re-route market depth request. Req Id: {0}, ConId: {1}, Exchange: {2}", reqId, conId, exchange);
         }
-        public void marketRule(int marketRuleId, PriceIncrement[] priceIncrements) 
+        public void marketRule(int marketRuleId, PriceIncrement[] priceIncrements)
         {
             Console.WriteLine("Market Rule Id: " + marketRuleId);
-            foreach (var priceIncrement in priceIncrements) 
+            foreach (var priceIncrement in priceIncrements)
             {
                 Console.WriteLine("Low Edge: {0}, Increment: {1}", ((decimal)priceIncrement.LowEdge).ToString(), ((decimal)priceIncrement.Increment).ToString());
             }
@@ -634,8 +647,8 @@ namespace IB.Api.Tws.Client
         }
         public virtual void completedOrder(Contract contract, Order order, OrderState orderState)
         {
-            Console.WriteLine("CompletedOrder. PermID: " + order.PermId + ", ParentPermId: " + Util.LongMaxString(order.ParentPermId) + ", Account: " + order.Account + ", Symbol: " + contract.Symbol + ", SecType: " + contract.SecType + 
-                " , Exchange: " + contract.Exchange + ", Action: " + order.Action + ", OrderType: " + order.OrderType + ", TotalQty: " + order.TotalQuantity + 
+            Console.WriteLine("CompletedOrder. PermID: " + order.PermId + ", ParentPermId: " + Util.LongMaxString(order.ParentPermId) + ", Account: " + order.Account + ", Symbol: " + contract.Symbol + ", SecType: " + contract.SecType +
+                " , Exchange: " + contract.Exchange + ", Action: " + order.Action + ", OrderType: " + order.OrderType + ", TotalQty: " + order.TotalQuantity +
                 ", CashQty: " + order.CashQty + ", FilledQty: " + order.FilledQuantity + ", LmtPrice: " + order.LmtPrice + ", AuxPrice: " + order.AuxPrice + ", Status: " + orderState.Status +
                 ", CompletedTime: " + orderState.CompletedTime + ", CompletedStatus: " + orderState.CompletedStatus);
         }

@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using IB.Api.Tws.Client.Types;
 
 namespace IB.Api.Tws.Client.Helper
 {
     public class OrderHelper
     {
-    /// <summary>
+        /// <summary>
         /// An auction order is entered into the electronic trading system during the pre-market opening period for execution at the 
         /// Calculated Opening Price (COP). If your order is not filled on the open, the order is re-submitted as a limit order with 
         /// the limit price set to the COP or the best bid/ask after the market opens.
@@ -47,11 +48,11 @@ namespace IB.Api.Tws.Client.Helper
         /// lower/higher than the current displayed bid/ask.
         /// Products: BOND, CFD, EFP, CASH, FUND, FUT, FOP, OPT, STK, WAR
         /// </summary>
-        public static Order MarketOrder(string action, double quantity)
+        public static Order MarketOrder(OrderAction action, double quantity)
         {
             //! [market]
             Order order = new Order();
-            order.Action = action;
+            order.Action = action.ToString();
             order.OrderType = "MKT";
             order.TotalQuantity = quantity;
             //! [market]
@@ -128,23 +129,23 @@ namespace IB.Api.Tws.Client.Helper
             return order;
         }
 
-		/// <summary>
-		// A Midprice order is designed to split the difference between the bid and ask prices, and fill at the current midpoint of 
-		// the NBBO or better. Set an optional price cap to define the highest price (for a buy order) or the lowest price (for a sell 
-		// order) you are willing to accept. Requires TWS 975+. Smart-routing to US stocks only.
+        /// <summary>
+        // A Midprice order is designed to split the difference between the bid and ask prices, and fill at the current midpoint of 
+        // the NBBO or better. Set an optional price cap to define the highest price (for a buy order) or the lowest price (for a sell 
+        // order) you are willing to accept. Requires TWS 975+. Smart-routing to US stocks only.
         /// </summary>
-		public static Order Midprice(string action, double quantity, double priceCap)
+        public static Order Midprice(string action, double quantity, double priceCap)
         {
             //! [midprice]
             Order order = new Order();
             order.Action = action;
             order.OrderType = "MIDPRICE";
             order.TotalQuantity = quantity;
-			order.LmtPrice = priceCap;
+            order.LmtPrice = priceCap;
             //! [midprice]
             return order;
         }
-		
+
         /// <summary>
         /// A pegged-to-market order is designed to maintain a purchase price relative to the national best offer (NBO) or a sale price 
         /// relative to the national best bid (NBB). Depending on the width of the quote, this order may be passive or aggressive. 
@@ -364,11 +365,11 @@ namespace IB.Api.Tws.Client.Helper
             return order;
         }
 
-		/// <summary>
-		/// Forex orders can be placed in demonination of second currency in pair using cashQty field
-		/// Requires TWS or IBG 963+
-		/// https://www.interactivebrokers.com/en/index.php?f=23876#963-02
-		/// <summary>
+        /// <summary>
+        /// Forex orders can be placed in demonination of second currency in pair using cashQty field
+        /// Requires TWS or IBG 963+
+        /// https://www.interactivebrokers.com/en/index.php?f=23876#963-02
+        /// <summary>
 
         public static Order LimitOrderWithCashQty(string action, double quantity, double limitPrice, double cashQty)
         {
@@ -477,7 +478,7 @@ namespace IB.Api.Tws.Client.Helper
             order.OrderType = "PEG MID";
             order.TotalQuantity = quantity;
             order.AuxPrice = offset;
-			order.LmtPrice = limitPrice;
+            order.LmtPrice = limitPrice;
             // ! [pegged_midpoint]
             return order;
         }
@@ -489,7 +490,7 @@ namespace IB.Api.Tws.Client.Helper
         /// Products: CFD, BAG, FOP, CASH, FUT, OPT, STK, WAR
         /// </summary>
         //! [bracket]
-        public static List<Order> BracketOrder(int parentOrderId, string action, double quantity, double limitPrice, 
+        public static List<Order> BracketOrder(int parentOrderId, string action, double quantity, double limitPrice,
             double takeProfitLimitPrice, double stopLossPrice)
         {
             //This will be our main or "parent" order
@@ -732,12 +733,12 @@ namespace IB.Api.Tws.Client.Helper
             order.OrderType = "LMT";
             order.TotalQuantity = quantity;
             order.OrderComboLegs = new List<OrderComboLeg>();
-            foreach(double price in legPrices)
+            foreach (double price in legPrices)
             {
                 OrderComboLeg comboLeg = new OrderComboLeg();
                 comboLeg.Price = 5.0;
                 order.OrderComboLegs.Add(comboLeg);
-            }           
+            }
             if (nonGuaranteed)
             {
                 order.SmartComboRoutingParams = new List<TagValue>();
@@ -843,7 +844,7 @@ namespace IB.Api.Tws.Client.Helper
         }
 
         //! [fhedge]
-        public static Order MarketFHedge(int parentOrderId, string action)
+        public static Order MarketFHedge(int parentOrderId, OrderAction action)
         {
             //FX Hedge orders can only have a quantity of 0
             Order order = MarketOrder(action, 0);
@@ -854,7 +855,7 @@ namespace IB.Api.Tws.Client.Helper
         //! [fhedge]
 
         public static Order PeggedToBenchmark(string action, double quantity, double startingPrice, bool peggedChangeAmountDecrease, double peggedChangeAmount,
-             double referenceChangeAmount, int referenceConId, string referenceExchange, double stockReferencePrice,  
+             double referenceChangeAmount, int referenceConId, string referenceExchange, double stockReferencePrice,
             double referenceContractLowerRange, double referenceContractUpperRange)
         {
             //! [pegged_benchmark]
@@ -884,7 +885,7 @@ namespace IB.Api.Tws.Client.Helper
             //! [pegged_benchmark]
             return order;
         }
-        
+
 
         public static Order AttachAdjustableToStop(Order parent, double attachedOrderStopPrice, double triggerPrice, double adjustStopPrice)
         {
@@ -902,7 +903,7 @@ namespace IB.Api.Tws.Client.Helper
             return order;
         }
 
-        public static Order AttachAdjustableToStopLimit(Order parent, double attachedOrderStopPrice, double triggerPrice, 
+        public static Order AttachAdjustableToStopLimit(Order parent, double attachedOrderStopPrice, double triggerPrice,
             double adjustedStopPrice, double adjustedStopLimitPrice)
         {
             //! [adjustable_stop_limit]
@@ -920,8 +921,8 @@ namespace IB.Api.Tws.Client.Helper
             //! [adjustable_stop_limit]
             return order;
         }
-		
-		public static Order AttachAdjustableToTrail(Order parent, double attachedOrderStopPrice, double triggerPrice, double adjustedStopPrice, 
+
+        public static Order AttachAdjustableToTrail(Order parent, double attachedOrderStopPrice, double triggerPrice, double adjustedStopPrice,
             double adjustedTrailAmount, int trailUnit)
         {
             //! [adjustable_trail]
