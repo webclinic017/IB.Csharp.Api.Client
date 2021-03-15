@@ -13,10 +13,10 @@ namespace IB.Api.Tws.Client
     public partial class IbGatewayClient
     {
         private Dictionary<string, string> _accountDictionary;
-        public event EventHandler<Account> OnAccountReceived;
+        public event EventHandler<AccountHandler> OnAccountReceived;
         private void OnAccountReceivedHandler(Dictionary<string, string> accountDictionary)
         {
-            OnAccountReceived?.Invoke(this, new Account(accountDictionary));
+            OnAccountReceived?.Invoke(this, new AccountHandler(accountDictionary));
         }
         public void SubscribeToAccountUpdates()
         {
@@ -43,10 +43,10 @@ namespace IB.Api.Tws.Client
     //Positions
     public partial class IbGatewayClient
     {
-        public event EventHandler<Position> OnPortfolioUpdateReceived;
+        public event EventHandler<PositionHandler> OnPortfolioUpdateReceived;
         private void OnPortfolioUpdateReceivedHandler(Contract contract, double position, double marketPrice, double unrealizedPNL)
         {
-            OnPortfolioUpdateReceived?.Invoke(this, new Position(contract, position, marketPrice, unrealizedPNL));
+            OnPortfolioUpdateReceived?.Invoke(this, new PositionHandler(contract, position, marketPrice, unrealizedPNL));
         }
         public void SubscribeToPositionUpdates()
         {
@@ -73,16 +73,16 @@ namespace IB.Api.Tws.Client
     //Market Data
     public partial class IbGatewayClient
     {
-        public event EventHandler<Price> OnPriceUpdateReceived;
-        private void OnPriceUpdateReceivedHandler(Price price)
+        public event EventHandler<PriceHandler> OnPriceUpdateReceived;
+        private void OnPriceUpdateReceivedHandler(PriceHandler price)
         {
             OnPriceUpdateReceived?.Invoke(this, price);
         }
-        public Dictionary<int, Price> Prices = new Dictionary<int, Price>();
+        public Dictionary<int, PriceHandler> Prices = new Dictionary<int, PriceHandler>();
         public void SubscribeToMarketData(int id, Contract contract)
         {
             _clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
-            Prices[id] = new Price
+            Prices[id] = new PriceHandler
             {
                 Id = id,
                 Symbol = contract.Symbol
@@ -136,11 +136,69 @@ namespace IB.Api.Tws.Client
     //Orders
     public partial class IbGatewayClient
     {
+        public void RequestCompletedOrders()
+        {
+            _clientSocket.reqCompletedOrders(true);
+        }
+        public event EventHandler<OpenOrderHandler> OnOpenOrderUpdateReceived;        
+        private void OnOpenOrderUpdateReceivedHandler(OpenOrderHandler openOrder)
+        {
+            OnOpenOrderUpdateReceived?.Invoke(this, openOrder);
+        }
+        public event EventHandler<OrderStatusHandler> OnOrderStatusReceived;        
+        private void OnOrderStatusReceivedHandler(OrderStatusHandler orderStatus)
+        {
+            OnOrderStatusReceived?.Invoke(this, orderStatus);
+        }
         public void OpenMarketOrder(OrderAction orderAction, Contract contract, double quantity)
         {
             _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.MarketOrder(orderAction, quantity));
         }
+        public virtual void orderStatus(int orderId, string status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
+        {
+            var orderStatusHandler = new OrderStatusHandler
+            {
+                OrderId = orderId,
+                Status = status,
+                Filled = filled,
+                Remaining = remaining,
+                AvgFillPrice = avgFillPrice,
+                PermId = permId,
+                ParentId = parentId,
+                LastFillPrice = lastFillPrice,
+                ClientId = clientId,
+                WhyHeld = whyHeld,
+                MktCapPrice = mktCapPrice
+            };
+            OnOrderStatusReceivedHandler(orderStatusHandler);
+        }
+        public virtual void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
+        {
+            var openOrder = new OpenOrderHandler
+            {
+                OrderId = orderId,
+                Contract = contract,
+                Order = order,
+                OrderState = orderState
+            };
+            OnOpenOrderUpdateReceivedHandler(openOrder);
+        }
+        public virtual void openOrderEnd()
+        {
+            Console.WriteLine("OpenOrderEnd");
+        }
+        public virtual void completedOrder(Contract contract, Order order, OrderState orderState)
+        {
+            var orderStatusHandler = new OrderStatusHandler
+            {
+                Status = orderState.Status,
+                PermId =  order.PermId
+            };
+            OnOrderStatusReceivedHandler(orderStatusHandler);        
+        }
+        public virtual void completedOrdersEnd() {}
     }
+    
     public partial class IbGatewayClient : EWrapper
     {
         private readonly EReaderSignal _signal;
@@ -186,7 +244,8 @@ namespace IB.Api.Tws.Client
         }
         public virtual void error(int id, int errorCode, string errorMsg)
         {
-            Console.WriteLine("Error. Id: " + id + ", Code: " + errorCode + ", Msg: " + errorMsg + "\n");
+            if (id == -1) Console.WriteLine("Code: " + errorCode + ", Msg: " + errorMsg);
+            else Console.WriteLine("Error. Id: " + id + ", Code: " + errorCode + ", Msg: " + errorMsg);
         }
         public virtual void connectionClosed()
         {
@@ -222,21 +281,6 @@ namespace IB.Api.Tws.Client
         public virtual void accountSummaryEnd(int reqId)
         {
             Console.WriteLine("AccountSummaryEnd. Req Id: " + reqId + "\n");
-        }
-        public virtual void orderStatus(int orderId, string status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
-        {
-            Console.WriteLine("OrderStatus. Id: " + orderId + ", Status: " + status + ", Filled: " + filled + ", Remaining: " + remaining
-                + ", AvgFillPrice: " + avgFillPrice + ", PermId: " + permId + ", ParentId: " + parentId + ", LastFillPrice: " + lastFillPrice + ", ClientId: " + clientId + ", WhyHeld: " + whyHeld + ", MktCapPrice: " + mktCapPrice);
-        }
-        public virtual void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
-        {
-            Console.WriteLine("OpenOrder. PermID: " + order.PermId + ", ClientId: " + order.ClientId + ", OrderId: " + orderId + ", Account: " + order.Account +
-                ", Symbol: " + contract.Symbol + ", SecType: " + contract.SecType + " , Exchange: " + contract.Exchange + ", Action: " + order.Action + ", OrderType: " + order.OrderType +
-                ", TotalQty: " + order.TotalQuantity + ", CashQty: " + order.CashQty + ", LmtPrice: " + order.LmtPrice + ", AuxPrice: " + order.AuxPrice + ", Status: " + orderState.Status);
-        }
-        public virtual void openOrderEnd()
-        {
-            Console.WriteLine("OpenOrderEnd");
         }
         public virtual void contractDetails(int reqId, ContractDetails contractDetails)
         {
@@ -644,17 +688,6 @@ namespace IB.Api.Tws.Client
         public void orderBound(long orderId, int apiClientId, int apiOrderId)
         {
             Console.WriteLine("Order bound. Order Id: {0}, Api Client Id: {1}, Api Order Id: {2}", orderId, apiClientId, apiOrderId);
-        }
-        public virtual void completedOrder(Contract contract, Order order, OrderState orderState)
-        {
-            Console.WriteLine("CompletedOrder. PermID: " + order.PermId + ", ParentPermId: " + Util.LongMaxString(order.ParentPermId) + ", Account: " + order.Account + ", Symbol: " + contract.Symbol + ", SecType: " + contract.SecType +
-                " , Exchange: " + contract.Exchange + ", Action: " + order.Action + ", OrderType: " + order.OrderType + ", TotalQty: " + order.TotalQuantity +
-                ", CashQty: " + order.CashQty + ", FilledQty: " + order.FilledQuantity + ", LmtPrice: " + order.LmtPrice + ", AuxPrice: " + order.AuxPrice + ", Status: " + orderState.Status +
-                ", CompletedTime: " + orderState.CompletedTime + ", CompletedStatus: " + orderState.CompletedStatus);
-        }
-        public virtual void completedOrdersEnd()
-        {
-            Console.WriteLine("CompletedOrdersEnd");
-        }
+        }        
     }
 }

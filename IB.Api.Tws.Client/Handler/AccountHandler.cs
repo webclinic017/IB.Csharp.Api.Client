@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace IB.Api.Tws.Client.Handler
 {
-    public class Account
+    public class AccountHandler
     {
         public string AccountCode { get; set; }
         public bool IsReady { get; set; }
@@ -13,7 +13,7 @@ namespace IB.Api.Tws.Client.Handler
         public double ExcessLiquidity { get; set; }
         public double Cash { get; set; }
 
-        public Account(Dictionary<string, string> accountDictionary)
+        public AccountHandler(Dictionary<string, string> accountDictionary)
         {
             AccountCode = accountDictionary["AccountCode"];
             AccountType = accountDictionary["AccountType"];

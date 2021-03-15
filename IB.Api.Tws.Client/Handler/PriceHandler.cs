@@ -1,6 +1,6 @@
 namespace IB.Api.Tws.Client.Handler
 {
-    public class Price
+    public class PriceHandler
     {
         public int Id { get; set; }
         public string Symbol { get; set; }
