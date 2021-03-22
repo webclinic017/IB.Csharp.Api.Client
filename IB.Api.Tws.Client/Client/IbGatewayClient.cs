@@ -88,6 +88,15 @@ namespace IB.Api.Tws.Client
                 Symbol = contract.Symbol
             };
         }
+        public event EventHandler<MarketDepthLevel2Handler> OnMarketDepthLevel2Received;
+        private void OnMarketDepthLevel2ReceivedHandler(MarketDepthLevel2Handler data)
+        {
+            OnMarketDepthLevel2Received?.Invoke(this, data);
+        }
+        public void RequestMarketDepth(int id, Contract contract)
+        {
+            _clientSocket.reqMarketDepth(id, contract, 5, true, null);
+        }
         public void UnsubscribeFromMarketData(int id)
         {
             _clientSocket.cancelMktData(id);
@@ -139,6 +148,10 @@ namespace IB.Api.Tws.Client
         public void RequestCompletedOrders()
         {
             _clientSocket.reqCompletedOrders(true);
+        }
+        public void RequestExecutions()
+        {
+            _clientSocket.reqExecutions(10001, new ExecutionFilter());
         }
         public event EventHandler<OpenOrderHandler> OnOpenOrderUpdateReceived;        
         private void OnOpenOrderUpdateReceivedHandler(OpenOrderHandler openOrder)
@@ -414,7 +427,19 @@ namespace IB.Api.Tws.Client
         }
         public virtual void updateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size, bool isSmartDepth)
         {
-            Console.WriteLine("UpdateMarketDepthL2. " + tickerId + " - Position: " + position + ", Operation: " + operation + ", Side: " + side + ", Price: " + price + ", Size: " + size + ", isSmartDepth: " + isSmartDepth);
+            var data = new MarketDepthLevel2Handler
+            {
+                At = DateTime.Now,
+                TickerId = tickerId,
+                Position = position,
+                MarketMaker = marketMaker,
+                Operation = operation,
+                Side = side,
+                Price = price,
+                Size = size,
+                IsSmartDepth = isSmartDepth
+            };
+            OnMarketDepthLevel2ReceivedHandler(data);
         }
         public virtual void updateNewsBulletin(int msgId, int msgType, String message, String origExchange)
         {
