@@ -1,11 +1,7 @@
 ﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace IB.Api.Tws.Client
 {
@@ -16,6 +12,7 @@ namespace IB.Api.Tws.Client
      */
     public class Contract
     {
+        private int id;
         private int conId;
         private string symbol;
         private string secType;
@@ -35,7 +32,10 @@ namespace IB.Api.Tws.Client
         private List<ComboLeg> comboLegs;
         private DeltaNeutralContract deltaNeutralContract;
 
-
+        public int Id{
+            get { return id; }
+            set { id = value; }
+        }
         /**
         * @brief The unique IB contract identifier
         */
@@ -44,7 +44,6 @@ namespace IB.Api.Tws.Client
             get { return conId; }
             set { conId = value; }
         }
-
 
         /**
          * @brief The underlying's asset symbol

@@ -79,12 +79,12 @@ namespace IB.Api.Tws.Client
             OnPriceUpdateReceived?.Invoke(this, price);
         }
         public Dictionary<int, PriceHandler> Prices = new Dictionary<int, PriceHandler>();
-        public void SubscribeToMarketData(int id, Contract contract)
+        public void SubscribeToMarketData(Contract contract)
         {
-            _clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
-            Prices[id] = new PriceHandler
+            _clientSocket.reqMktData(contract.Id, contract, string.Empty, false, false, null);
+            Prices[contract.Id] = new PriceHandler
             {
-                Id = id,
+                Id = contract.Id,
                 Symbol = contract.Symbol
             };
         }
