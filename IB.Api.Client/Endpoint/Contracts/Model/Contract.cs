@@ -6,7 +6,7 @@ namespace IB.Api.Client.Endpoint.Contracts.Model
     public class Contract
     {
         [JsonProperty("conid")]
-        public long Conid { get; set; }
+        public int Conid { get; set; }
 
         [JsonProperty("companyHeader")]
         public string CompanyHeader { get; set; }

@@ -30,6 +30,10 @@ namespace IB.Api.Client.Endpoint.Orders
                 Expiry = TimeInForce.GTC,
                 AllocationMethod = AllocationMethod.AvailableEquity
             };
+            return OrderPreview(accountId, request);
+        }
+        public OrderPreviewResponse OrderPreview(string accountId, OrderRequest request)
+        {
             var payload = JsonConvert.SerializeObject(request);
             return PostApiResponse<OrderPreviewResponse>($"/iserver/account/{accountId}/order/whatif", payload);
         }
