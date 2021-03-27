@@ -20,7 +20,9 @@ namespace IB.Api.Client.Enum
         FOXRIVER,
         TPLUS1,
         NYSENAT,
-        PSX
+        PSX,
+        GLOBEX,
+        CME
     }
 }
 

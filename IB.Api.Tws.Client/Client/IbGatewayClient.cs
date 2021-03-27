@@ -167,6 +167,10 @@ namespace IB.Api.Tws.Client
         {
             _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.MarketOrder(orderAction, quantity));
         }
+        public void PreviewMarketOrder(OrderAction orderAction, Contract contract, double quantity)
+        {
+            _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.WhatIfMarketOrder(orderAction, quantity));
+        }
         public virtual void orderStatus(int orderId, string status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
         {
             var orderStatusHandler = new OrderStatusHandler

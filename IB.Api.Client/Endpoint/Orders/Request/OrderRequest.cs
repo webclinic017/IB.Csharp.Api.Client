@@ -12,8 +12,9 @@ namespace IB.Api.Client.Endpoint.Orders.Request
         [JsonProperty("conid")]
         public long ContractId { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("secType")]
-        public string SecType { get; set; }
+        public SecurityType SecType { get; set; }
 
         [JsonProperty("cOID")]
         public string CustomerOrderId { get; set; }
