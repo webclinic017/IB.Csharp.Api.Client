@@ -215,7 +215,35 @@ namespace IB.Api.Tws.Client
         }
         public virtual void completedOrdersEnd() {}
     }
-    
+
+    //Contract
+    public partial class IbGatewayClient
+    {
+        public event EventHandler<List<ContractDetails>> OnContractDetailsReceived;        
+        private void OnContractDetailsReceivedHandler(List<ContractDetails> contractDetailsList)
+        {
+            OnContractDetailsReceived?.Invoke(this, contractDetailsList);
+        }
+        private List<ContractDetails> _contractDetailsList;
+        public void RequestContractDetails(int id, string symbol, SecurityType securityType)
+        {
+            _contractDetailsList = new List<ContractDetails>();
+            _clientSocket.reqContractDetails(id, 
+                new Contract { 
+                    Symbol = symbol,
+                    SecType = securityType.ToString()
+                    });
+        }        
+        public virtual void contractDetails(int reqId, ContractDetails contractDetails)
+        {
+            _contractDetailsList.Add(contractDetails);
+        }
+        public virtual void contractDetailsEnd(int reqId)
+        {
+            OnContractDetailsReceivedHandler(_contractDetailsList);
+        }
+    }
+
     public partial class IbGatewayClient : EWrapper
     {
         private readonly EReaderSignal _signal;
@@ -298,109 +326,7 @@ namespace IB.Api.Tws.Client
         public virtual void accountSummaryEnd(int reqId)
         {
             Console.WriteLine("AccountSummaryEnd. Req Id: " + reqId + "\n");
-        }
-        public virtual void contractDetails(int reqId, ContractDetails contractDetails)
-        {
-            Console.WriteLine("ContractDetails begin. ReqId: " + reqId);
-            printContractMsg(contractDetails.Contract);
-            printContractDetailsMsg(contractDetails);
-            Console.WriteLine("ContractDetails end. ReqId: " + reqId);
-        }
-        public void printContractMsg(Contract contract)
-        {
-            Console.WriteLine("\tConId: " + contract.ConId);
-            Console.WriteLine("\tSymbol: " + contract.Symbol);
-            Console.WriteLine("\tSecType: " + contract.SecType);
-            Console.WriteLine("\tLastTradeDateOrContractMonth: " + contract.LastTradeDateOrContractMonth);
-            Console.WriteLine("\tStrike: " + contract.Strike);
-            Console.WriteLine("\tRight: " + contract.Right);
-            Console.WriteLine("\tMultiplier: " + contract.Multiplier);
-            Console.WriteLine("\tExchange: " + contract.Exchange);
-            Console.WriteLine("\tPrimaryExchange: " + contract.PrimaryExch);
-            Console.WriteLine("\tCurrency: " + contract.Currency);
-            Console.WriteLine("\tLocalSymbol: " + contract.LocalSymbol);
-            Console.WriteLine("\tTradingClass: " + contract.TradingClass);
-        }
-        public void printContractDetailsMsg(ContractDetails contractDetails)
-        {
-            Console.WriteLine("\tMarketName: " + contractDetails.MarketName);
-            Console.WriteLine("\tMinTick: " + contractDetails.MinTick);
-            Console.WriteLine("\tPriceMagnifier: " + contractDetails.PriceMagnifier);
-            Console.WriteLine("\tOrderTypes: " + contractDetails.OrderTypes);
-            Console.WriteLine("\tValidExchanges: " + contractDetails.ValidExchanges);
-            Console.WriteLine("\tUnderConId: " + contractDetails.UnderConId);
-            Console.WriteLine("\tLongName: " + contractDetails.LongName);
-            Console.WriteLine("\tContractMonth: " + contractDetails.ContractMonth);
-            Console.WriteLine("\tIndystry: " + contractDetails.Industry);
-            Console.WriteLine("\tCategory: " + contractDetails.Category);
-            Console.WriteLine("\tSubCategory: " + contractDetails.Subcategory);
-            Console.WriteLine("\tTimeZoneId: " + contractDetails.TimeZoneId);
-            Console.WriteLine("\tTradingHours: " + contractDetails.TradingHours);
-            Console.WriteLine("\tLiquidHours: " + contractDetails.LiquidHours);
-            Console.WriteLine("\tEvRule: " + contractDetails.EvRule);
-            Console.WriteLine("\tEvMultiplier: " + contractDetails.EvMultiplier);
-            Console.WriteLine("\tMdSizeMultiplier: " + contractDetails.MdSizeMultiplier);
-            Console.WriteLine("\tAggGroup: " + contractDetails.AggGroup);
-            Console.WriteLine("\tUnderSymbol: " + contractDetails.UnderSymbol);
-            Console.WriteLine("\tUnderSecType: " + contractDetails.UnderSecType);
-            Console.WriteLine("\tMarketRuleIds: " + contractDetails.MarketRuleIds);
-            Console.WriteLine("\tRealExpirationDate: " + contractDetails.RealExpirationDate);
-            Console.WriteLine("\tLastTradeTime: " + contractDetails.LastTradeTime);
-            printContractDetailsSecIdList(contractDetails.SecIdList);
-        }
-        public void printContractDetailsSecIdList(List<TagValue> secIdList)
-        {
-            if (secIdList != null && secIdList.Count > 0)
-            {
-                Console.Write("\tSecIdList: {");
-                foreach (TagValue tagValue in secIdList)
-                {
-                    Console.Write(tagValue.Tag + "=" + tagValue.Value + ";");
-                }
-                Console.WriteLine("}");
-            }
-        }
-        public void printBondContractDetailsMsg(ContractDetails contractDetails)
-        {
-            Console.WriteLine("\tSymbol: " + contractDetails.Contract.Symbol);
-            Console.WriteLine("\tSecType: " + contractDetails.Contract.SecType);
-            Console.WriteLine("\tCusip: " + contractDetails.Cusip);
-            Console.WriteLine("\tCoupon: " + contractDetails.Coupon);
-            Console.WriteLine("\tMaturity: " + contractDetails.Maturity);
-            Console.WriteLine("\tIssueDate: " + contractDetails.IssueDate);
-            Console.WriteLine("\tRatings: " + contractDetails.Ratings);
-            Console.WriteLine("\tBondType: " + contractDetails.BondType);
-            Console.WriteLine("\tCouponType: " + contractDetails.CouponType);
-            Console.WriteLine("\tConvertible: " + contractDetails.Convertible);
-            Console.WriteLine("\tCallable: " + contractDetails.Callable);
-            Console.WriteLine("\tPutable: " + contractDetails.Putable);
-            Console.WriteLine("\tDescAppend: " + contractDetails.DescAppend);
-            Console.WriteLine("\tExchange: " + contractDetails.Contract.Exchange);
-            Console.WriteLine("\tCurrency: " + contractDetails.Contract.Currency);
-            Console.WriteLine("\tMarketName: " + contractDetails.MarketName);
-            Console.WriteLine("\tTradingClass: " + contractDetails.Contract.TradingClass);
-            Console.WriteLine("\tConId: " + contractDetails.Contract.ConId);
-            Console.WriteLine("\tMinTick: " + contractDetails.MinTick);
-            Console.WriteLine("\tMdSizeMultiplier: " + contractDetails.MdSizeMultiplier);
-            Console.WriteLine("\tOrderTypes: " + contractDetails.OrderTypes);
-            Console.WriteLine("\tValidExchanges: " + contractDetails.ValidExchanges);
-            Console.WriteLine("\tNextOptionDate: " + contractDetails.NextOptionDate);
-            Console.WriteLine("\tNextOptionType: " + contractDetails.NextOptionType);
-            Console.WriteLine("\tNextOptionPartial: " + contractDetails.NextOptionPartial);
-            Console.WriteLine("\tNotes: " + contractDetails.Notes);
-            Console.WriteLine("\tLong Name: " + contractDetails.LongName);
-            Console.WriteLine("\tEvRule: " + contractDetails.EvRule);
-            Console.WriteLine("\tEvMultiplier: " + contractDetails.EvMultiplier);
-            Console.WriteLine("\tAggGroup: " + contractDetails.AggGroup);
-            Console.WriteLine("\tMarketRuleIds: " + contractDetails.MarketRuleIds);
-            Console.WriteLine("\tLastTradeTime: " + contractDetails.LastTradeTime);
-            Console.WriteLine("\tTimeZoneId: " + contractDetails.TimeZoneId);
-            printContractDetailsSecIdList(contractDetails.SecIdList);
-        }
-        public virtual void contractDetailsEnd(int reqId)
-        {
-            Console.WriteLine("ContractDetailsEnd. " + reqId + "\n");
-        }
+        }        
         public virtual void execDetails(int reqId, Contract contract, Execution execution)
         {
             Console.WriteLine("ExecDetails. " + reqId + " - " + contract.Symbol + ", " + contract.SecType + ", " + contract.Currency + " - " + execution.ExecId + ", " + execution.OrderId + ", " + execution.Shares + ", " + execution.LastLiquidity);
@@ -474,7 +400,6 @@ namespace IB.Api.Tws.Client
         public virtual void bondContractDetails(int requestId, ContractDetails contractDetails)
         {
             Console.WriteLine("BondContractDetails begin. ReqId: " + requestId);
-            printBondContractDetailsMsg(contractDetails);
             Console.WriteLine("BondContractDetails end. ReqId: " + requestId);
         }
         public virtual void historicalDataEnd(int reqId, string startDate, string endDate)

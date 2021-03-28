@@ -1,3 +1,5 @@
+using IB.Api.Tws.Client.Types;
+
 namespace IB.Api.Tws.Client.Helper
 {
     public class IbContractDefinition
@@ -7,6 +9,17 @@ namespace IB.Api.Tws.Client.Helper
             Contract contract = new Contract();
             contract.Id = 1000;
             contract.Symbol = "AAPL";
+            contract.Currency = "USD";
+            contract.SecType = "STK";
+            contract.Exchange = "SMART";
+            contract.PrimaryExch = "NASDAQ";
+            return contract;
+        }
+        public static Contract NasdaqStock(int id, string symbol)
+        {
+            Contract contract = new Contract();
+            contract.Id = id;
+            contract.Symbol = symbol;
             contract.Currency = "USD";
             contract.SecType = "STK";
             contract.Exchange = "SMART";
@@ -31,6 +44,33 @@ namespace IB.Api.Tws.Client.Helper
             contract.SecType = "IND";
             contract.Currency = "EUR";
             contract.Exchange = "DTB";
+            return contract;
+        }
+        /// <summary>
+        /// Attributes as per TWS definition screen
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="product"></param>
+        /// <param name="symbol"></param>
+        /// <param name="exchange"></param>
+        /// <returns></returns>
+        public static Contract Future(int id, string product, string symbol, Exchange exchange)
+        {
+            Contract contract = new Contract();
+            contract.Id = id;
+            contract.Symbol = product;
+            contract.SecType = "FUT";
+            contract.Exchange = exchange.ToString();
+            contract.LocalSymbol = symbol;
+            return contract;         
+        }
+        public static Contract SampleFuture()
+        {
+            Contract contract = new Contract();
+            contract.Symbol = "M6A";
+            contract.SecType = "FUT";
+            contract.Exchange = "GLOBEX";
+            contract.LocalSymbol = "M6AM1";
             return contract;
         }
     }
