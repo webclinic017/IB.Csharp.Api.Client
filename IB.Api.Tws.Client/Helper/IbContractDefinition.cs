@@ -49,19 +49,17 @@ namespace IB.Api.Tws.Client.Helper
         /// <summary>
         /// Attributes as per TWS definition screen
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="product"></param>
-        /// <param name="symbol"></param>
+        /// <param name="symbol">Product on the TWS definition dialog</param>
+        /// <param name="localSymbol">Symbol on the TWS definition dialog</param>
         /// <param name="exchange"></param>
         /// <returns></returns>
-        public static Contract Future(int id, string product, string symbol, Exchange exchange)
+        public static Contract Future(string symbol, string localSymbol, Exchange exchange)
         {
             Contract contract = new Contract();
-            contract.Id = id;
-            contract.Symbol = product;
+            contract.Symbol = symbol;
             contract.SecType = "FUT";
             contract.Exchange = exchange.ToString();
-            contract.LocalSymbol = symbol;
+            contract.LocalSymbol = localSymbol;
             return contract;         
         }
         public static Contract SampleFuture()

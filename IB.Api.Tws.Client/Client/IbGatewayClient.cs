@@ -12,32 +12,39 @@ namespace IB.Api.Tws.Client
     //Accounts
     public partial class IbGatewayClient
     {
-        private Dictionary<string, string> _accountDictionary;
-        public event EventHandler<AccountHandler> OnAccountReceived;
-        private void OnAccountReceivedHandler(Dictionary<string, string> accountDictionary)
+        private List<AccountUpdateHandler> _accountUpdates;
+        public void SubscribeToAllAccountUpdates(List<string> accounts)
         {
-            OnAccountReceived?.Invoke(this, new AccountHandler(accountDictionary));
+            _accountUpdates = new List<AccountUpdateHandler>();
+
+            foreach (var account in accounts)
+            {
+                var requestId = int.Parse(account.Replace("U", string.Empty));
+                _clientSocket.reqAccountUpdatesMulti(requestId, account, "", false);
+                _accountUpdates.Add(new AccountUpdateHandler(requestId, account));
+            }            
         }
-        public void SubscribeToAccountUpdates()
+        public void UnSubscribeToAllAccountUpdates(List<string> accounts){
+            
+            foreach (var account in accounts)
+            {
+                _clientSocket.cancelAccountUpdatesMulti(int.Parse(account.Replace("U", string.Empty)));
+            }  
+        }
+        public virtual void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency)
         {
-            _clientSocket.reqAccountUpdates(true, _accountId);
+            _accountUpdates.ForEach(accountUpdateHandler =>
+            {
+                if(accountUpdateHandler.AccountId == account)
+                    accountUpdateHandler.AccountValues[key] = value;
+            });            
         }
-        public void UnsubscribeFromAccountUpdates()
+        public event EventHandler<List<AccountUpdateHandler>> OnUpdateMultipleAccounts;
+
+        public virtual void accountUpdateMultiEnd(int reqId)
         {
-            _clientSocket.reqAccountUpdates(false, _accountId);
-        }
-        public virtual void updateAccountValue(string key, string value, string currency, string accountName)
-        {
-            _accountDictionary[key] = value;
-        }
-        public virtual void updateAccountTime(string timestamp)
-        {
-            _accountDictionary["UpdateAccountTime"] = timestamp;
-        }
-        public virtual void accountDownloadEnd(string account)
-        {
-            OnAccountReceivedHandler(_accountDictionary);
-        }
+            OnUpdateMultipleAccounts?.Invoke(this, _accountUpdates);
+        }    
     }
 
     //Positions
@@ -247,17 +254,14 @@ namespace IB.Api.Tws.Client
     public partial class IbGatewayClient : EWrapper
     {
         private readonly EReaderSignal _signal;
-        private string _accountId;
         private EClientSocket _clientSocket;
         private int NextOrderId;
         public string BboExchange { get; set; }
 
-        public IbGatewayClient(string address, int port, int clientId, string accountId)
+        public IbGatewayClient(string address, int port, int clientId)
         {
-            _accountId = accountId;
             _signal = new EReaderMonitorSignal();
             _clientSocket = new EClientSocket(this, _signal);
-            _accountDictionary = new Dictionary<string, string>();
 
             _clientSocket.eConnect(address, port, clientId);
             var reader = new EReader(_clientSocket, _signal);
@@ -437,15 +441,7 @@ namespace IB.Api.Tws.Client
         public virtual void positionMultiEnd(int reqId)
         {
             Console.WriteLine("Position Multi End. Request: " + reqId + "\n");
-        }
-        public virtual void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency)
-        {
-            Console.WriteLine("Account Update Multi. Request: " + reqId + ", Account: " + account + ", ModelCode: " + modelCode + ", Key: " + key + ", Value: " + value + ", Currency: " + currency + "\n");
-        }
-        public virtual void accountUpdateMultiEnd(int reqId)
-        {
-            Console.WriteLine("Account Update Multi End. Request: " + reqId + "\n");
-        }
+        }        
         public void securityDefinitionOptionParameter(int reqId, string exchange, int underlyingConId, string tradingClass, string multiplier, HashSet<string> expirations, HashSet<double> strikes)
         {
             Console.WriteLine("Security Definition Option Parameter. Reqest: {0}, Exchange: {1}, Undrelying contract id: {2}, Trading class: {3}, Multiplier: {4}, Expirations: {5}, Strikes: {6}",
@@ -642,6 +638,18 @@ namespace IB.Api.Tws.Client
         public void orderBound(long orderId, int apiClientId, int apiOrderId)
         {
             Console.WriteLine("Order bound. Order Id: {0}, Api Client Id: {1}, Api Order Id: {2}", orderId, apiClientId, apiOrderId);
-        }        
+        }       
+
+        public virtual void updateAccountValue(string key, string value, string currency, string accountName)
+        {
+            Console.WriteLine($"Account update| key:{key} value:{value} currency:{currency} accountName:{accountName}");
+        }
+        public virtual void updateAccountTime(string timestamp)
+        {
+        }
+        public virtual void accountDownloadEnd(string account)
+        {
+            Console.WriteLine($"Account download end| account:{account}");
+        } 
     }
 }
