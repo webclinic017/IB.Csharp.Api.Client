@@ -12,7 +12,7 @@ namespace IB.Api.Tws.Client
      */
     public class Contract
     {
-        private int id;
+        private int requestId;
         private int conId;
         private string symbol;
         private string secType;
@@ -32,9 +32,9 @@ namespace IB.Api.Tws.Client
         private List<ComboLeg> comboLegs;
         private DeltaNeutralContract deltaNeutralContract;
 
-        public int Id{
-            get { return id; }
-            set { id = value; }
+        public int RequestId{
+            get { return requestId; }
+            set { requestId = value; }
         }
         /**
         * @brief The unique IB contract identifier

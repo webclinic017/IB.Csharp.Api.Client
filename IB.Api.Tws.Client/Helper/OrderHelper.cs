@@ -16,7 +16,7 @@ namespace IB.Api.Tws.Client.Helper
             Order order = new Order();
             order.Action = action;
             order.Tif = "AUC";
-            order.OrderType = "MTL";
+            order.OrderType = OrderType.MarketToLimit;
             order.TotalQuantity = quantity;
             order.LmtPrice = price;
             return order;
@@ -31,7 +31,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.LmtPrice = price;
             order.DiscretionaryAmt = discretionaryAmount;
@@ -44,11 +44,11 @@ namespace IB.Api.Tws.Client.Helper
         /// lower/higher than the current displayed bid/ask.
         /// Products: BOND, CFD, EFP, CASH, FUND, FUT, FOP, OPT, STK, WAR
         /// </summary>
-        public static Order MarketOrder(OrderAction action, double quantity)
+        public static Order MarketOrder(OrderSide action, double quantity)
         {
             Order order = new Order();
             order.Action = action.ToString();
-            order.OrderType = "MKT";
+            order.OrderType = OrderType.Market;
             order.TotalQuantity = quantity;
             return order;
         }
@@ -66,7 +66,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "MIT";
+            order.OrderType = OrderType.MarketIfTouched;
             order.TotalQuantity = quantity;
             order.AuxPrice = price;
             return order;
@@ -80,7 +80,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "MOC";
+            order.OrderType = OrderType.MarketOnClose;
             order.TotalQuantity = quantity;
             return order;
         }
@@ -94,7 +94,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "MKT";
+            order.OrderType = OrderType.Market;
             order.TotalQuantity = quantity;
             order.Tif = "OPG";
             return order;
@@ -110,7 +110,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "MKT";
+            order.OrderType = OrderType.Market;
             order.TotalQuantity = quantity;
             return order;
         }
@@ -124,7 +124,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "MIDPRICE";
+            order.OrderType = OrderType.MidPrice;
             order.TotalQuantity = quantity;
             order.LmtPrice = priceCap;
             return order;
@@ -143,7 +143,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "PEG MKT";
+            order.OrderType = OrderType.PeggedToMarket;
             order.TotalQuantity = 100;
             order.AuxPrice = marketOffset;//Offset price
             return order;
@@ -163,7 +163,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "PEG STK";
+            order.OrderType = OrderType.PeggedToStock;
             order.TotalQuantity = quantity;
             order.Delta = delta;
             order.StockRefPrice = stockReferencePrice;
@@ -187,7 +187,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "REL";
+            order.OrderType = OrderType.RelativePeggedToPrimary;
             order.TotalQuantity = quantity;
             order.LmtPrice = priceCap;
             order.AuxPrice = offsetAmount;
@@ -205,7 +205,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.LmtPrice = price;
             order.SweepToFill = true;
@@ -227,7 +227,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.LmtPrice = price;
             order.AuctionStrategy = auctionStrategy;
@@ -252,7 +252,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "PEG STK";
+            order.OrderType = OrderType.PeggedToStock;
             order.TotalQuantity = quantity;
             order.Delta = delta;
             order.StartingPrice = startingPrice;
@@ -277,7 +277,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "REL";
+            order.OrderType = OrderType.RelativePeggedToPrimary;
             order.TotalQuantity = quantity;
             order.AuxPrice = offset;
             return order;
@@ -292,7 +292,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;//Large volumes!
             order.LmtPrice = price;
             order.BlockOrder = true;
@@ -323,7 +323,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.LmtPrice = limitPrice;
             return order;
@@ -339,7 +339,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.LmtPrice = limitPrice;
             order.CashQty = cashQty;
@@ -389,7 +389,7 @@ namespace IB.Api.Tws.Client.Helper
             Order order = new Order();
             order.Action = action;
             order.Tif = "OPG";
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.LmtPrice = limitPrice;
             return order;
@@ -449,7 +449,7 @@ namespace IB.Api.Tws.Client.Helper
             Order parent = new Order();
             parent.OrderId = parentOrderId;
             parent.Action = action;
-            parent.OrderType = "LMT";
+            parent.OrderType = OrderType.Limit;
             parent.TotalQuantity = quantity;
             parent.LmtPrice = limitPrice;
             //The parent and children orders will need this attribute set to false to prevent accidental executions.
@@ -459,7 +459,7 @@ namespace IB.Api.Tws.Client.Helper
             Order takeProfit = new Order();
             takeProfit.OrderId = parent.OrderId + 1;
             takeProfit.Action = action.Equals("BUY") ? "SELL" : "BUY";
-            takeProfit.OrderType = "LMT";
+            takeProfit.OrderType = OrderType.Limit;
             takeProfit.TotalQuantity = quantity;
             takeProfit.LmtPrice = takeProfitLimitPrice;
             takeProfit.ParentId = parentOrderId;
@@ -495,7 +495,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "MTL";
+            order.OrderType = OrderType.MarketToLimit;
             order.TotalQuantity = quantity;
             return order;
         }
@@ -620,7 +620,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.LmtPrice = limitPrice;
             if (nonGuaranteed)
@@ -663,7 +663,7 @@ namespace IB.Api.Tws.Client.Helper
         {
             Order order = new Order();
             order.Action = action;
-            order.OrderType = "LMT";
+            order.OrderType = OrderType.Limit;
             order.TotalQuantity = quantity;
             order.OrderComboLegs = new List<OrderComboLeg>();
             foreach (double price in legPrices)
@@ -770,10 +770,10 @@ namespace IB.Api.Tws.Client.Helper
         }
 
         //! [fhedge]
-        public static Order MarketFHedge(int parentOrderId, OrderAction action)
+        public static Order MarketFHedge(int parentOrderId, OrderSide side)
         {
             //FX Hedge orders can only have a quantity of 0
-            Order order = MarketOrder(action, 0);
+            Order order = MarketOrder(side, 0);
             order.ParentId = parentOrderId;
             order.HedgeType = "F";
             return order;
@@ -867,9 +867,9 @@ namespace IB.Api.Tws.Client.Helper
             order.WhatIf = true;
             return order;
         }
-        public static Order WhatIfMarketOrder(OrderAction action, double quantity)
+        public static Order WhatIfMarketOrder(OrderSide side, double quantity)
         {
-            Order order = MarketOrder(action, quantity);
+            Order order = MarketOrder(side, quantity);
             order.WhatIf = true;
             return order;
         }

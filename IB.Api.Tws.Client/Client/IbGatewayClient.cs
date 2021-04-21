@@ -22,39 +22,36 @@ namespace IB.Api.Tws.Client
                 var requestId = int.Parse(account.Replace("U", string.Empty));
                 _clientSocket.reqAccountUpdatesMulti(requestId, account, "", false);
                 _accountUpdates.Add(new AccountUpdateHandler(requestId, account));
-            }            
+            }
         }
-        public void UnSubscribeToAllAccountUpdates(List<string> accounts){
-            
+        public void UnSubscribeToAllAccountUpdates(List<string> accounts)
+        {
+
             foreach (var account in accounts)
             {
                 _clientSocket.cancelAccountUpdatesMulti(int.Parse(account.Replace("U", string.Empty)));
-            }  
+            }
         }
         public virtual void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency)
         {
             _accountUpdates.ForEach(accountUpdateHandler =>
             {
-                if(accountUpdateHandler.AccountId == account)
+                if (accountUpdateHandler.AccountId == account)
                     accountUpdateHandler.AccountValues[key] = value;
-            });            
+            });
         }
         public event EventHandler<List<AccountUpdateHandler>> OnUpdateMultipleAccounts;
 
         public virtual void accountUpdateMultiEnd(int reqId)
         {
             OnUpdateMultipleAccounts?.Invoke(this, _accountUpdates);
-        }    
+        }
     }
 
     //Positions
     public partial class IbGatewayClient
     {
         public event EventHandler<PositionHandler> OnPortfolioUpdateReceived;
-        private void OnPortfolioUpdateReceivedHandler(Contract contract, double position, double marketPrice, double unrealizedPNL)
-        {
-            OnPortfolioUpdateReceived?.Invoke(this, new PositionHandler(contract, position, marketPrice, unrealizedPNL));
-        }
         public void SubscribeToPositionUpdates()
         {
             _clientSocket.reqPositions();
@@ -73,36 +70,23 @@ namespace IB.Api.Tws.Client
         }
         public virtual void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
         {
-            OnPortfolioUpdateReceivedHandler(contract, position, marketPrice, unrealizedPNL);
+            OnPortfolioUpdateReceived?.Invoke(this, new PositionHandler(contract, position, marketPrice, unrealizedPNL));
         }
     }
 
-    //Market Data
+    //Market Real Time Data
     public partial class IbGatewayClient
     {
         public event EventHandler<PriceHandler> OnPriceUpdateReceived;
-        private void OnPriceUpdateReceivedHandler(PriceHandler price)
-        {
-            OnPriceUpdateReceived?.Invoke(this, price);
-        }
         public Dictionary<int, PriceHandler> Prices = new Dictionary<int, PriceHandler>();
         public void SubscribeToMarketData(Contract contract)
         {
-            _clientSocket.reqMktData(contract.Id, contract, string.Empty, false, false, null);
-            Prices[contract.Id] = new PriceHandler
+            _clientSocket.reqMktData(contract.RequestId, contract, string.Empty, false, false, null);
+            Prices[contract.RequestId] = new PriceHandler
             {
-                Id = contract.Id,
+                Id = contract.RequestId,
                 Symbol = contract.Symbol
             };
-        }
-        public event EventHandler<MarketDepthLevel2Handler> OnMarketDepthLevel2Received;
-        private void OnMarketDepthLevel2ReceivedHandler(MarketDepthLevel2Handler data)
-        {
-            OnMarketDepthLevel2Received?.Invoke(this, data);
-        }
-        public void RequestMarketDepth(int id, Contract contract)
-        {
-            _clientSocket.reqMarketDepth(id, contract, 5, true, null);
         }
         public void UnsubscribeFromMarketData(int id)
         {
@@ -125,33 +109,67 @@ namespace IB.Api.Tws.Client
                     }
             }
             Prices[tickerId] = priceItem;
-            OnPriceUpdateReceivedHandler(priceItem);
+            OnPriceUpdateReceived?.Invoke(this, priceItem);
         }
-        public virtual void tickSize(int tickerId, int field, int size)
+    }
+
+    //Level 2 Data
+    public partial class IbGatewayClient
+    {
+        public event EventHandler<MarketDepthLevel2Handler> OnMarketDepthLevel2Received;
+
+        public void RequestMarketDepth(int id, Contract contract)
         {
-            //Console.WriteLine("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
+            _clientSocket.reqMarketDepth(id, contract, 5, true, null);
         }
-        public virtual void tickString(int tickerId, int tickType, string value)
+        public virtual void updateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size, bool isSmartDepth)
         {
-            //Console.WriteLine("Tick string. Ticker Id:" + tickerId + ", Type: " + tickType + ", Value: " + value);
+            var data = new MarketDepthLevel2Handler
+            {
+                At = DateTime.Now,
+                TickerId = tickerId,
+                Position = position,
+                MarketMaker = marketMaker,
+                Operation = operation,
+                Side = side,
+                Price = price,
+                Size = size,
+                IsSmartDepth = isSmartDepth
+            };
+            OnMarketDepthLevel2Received?.Invoke(this, data);
         }
-        public virtual void tickGeneric(int tickerId, int field, double value)
+    }
+
+    //Historical Data
+    public partial class IbGatewayClient
+    {
+        public event EventHandler<HistoricalDataHandler> OnHistoricalDataReceived;
+        public event EventHandler<string> OnHistoricalEnd;
+        public void RequestHistoricalData(DateTime to, Contract contract, int duration, DurationUnit durationUnit, int barSize, BarSizeUnit barSizeUnit, HistoricalDataType historicalDataType)
         {
-            //Console.WriteLine("Tick Generic. Ticker Id:" + tickerId + ", Field: " + field + ", Value: " + value);
+            string endDate = to.ToString("yyyyMMdd HH:mm:ss");
+            _clientSocket.reqHistoricalData(contract.RequestId, contract, endDate, $"{duration} {durationUnit}", $"{barSize} {barSizeUnit}", historicalDataType.ToString(), 0, 1, false, null);
         }
-        public virtual void tickEFP(int tickerId, int tickType, double basisPoints, string formattedBasisPoints, double impliedFuture, int holdDays, string futureLastTradeDate, double dividendImpact, double dividendsToLastTradeDate)
+        public virtual void historicalData(int reqId, Bar bar)
         {
-            //Console.WriteLine("TickEFP. "+tickerId+", Type: "+tickType+", BasisPoints: "+basisPoints+", FormattedBasisPoints: "+formattedBasisPoints+", ImpliedFuture: "+impliedFuture+", HoldDays: "+holdDays+", FutureLastTradeDate: "+futureLastTradeDate+", DividendImpact: "+dividendImpact+", DividendsToLastTradeDate: "+dividendsToLastTradeDate);
+            var historicalDataHandler = new HistoricalDataHandler
+            {
+                RequestId = reqId,
+                BarData = bar
+            };
+            OnHistoricalDataReceived?.Invoke(this, historicalDataHandler);
         }
-        public virtual void tickSnapshotEnd(int tickerId)
+        public virtual void historicalDataEnd(int reqId, string startDate, string endDate)
         {
-            //Console.WriteLine("TickSnapshotEnd: "+tickerId);
+            OnHistoricalEnd?.Invoke(this, "HistoricalDataEnd - " + reqId + " from " + startDate + " to " + endDate);
         }
     }
 
     //Orders
     public partial class IbGatewayClient
     {
+        public event EventHandler<OpenOrderHandler> OnOpenOrderUpdateReceived;
+        public event EventHandler<OrderStatusHandler> OnOrderStatusReceived;
         public void RequestCompletedOrders()
         {
             _clientSocket.reqCompletedOrders(true);
@@ -160,23 +178,13 @@ namespace IB.Api.Tws.Client
         {
             _clientSocket.reqExecutions(10001, new ExecutionFilter());
         }
-        public event EventHandler<OpenOrderHandler> OnOpenOrderUpdateReceived;        
-        private void OnOpenOrderUpdateReceivedHandler(OpenOrderHandler openOrder)
+        public void OpenMarketOrder(OrderSide side, Contract contract, double quantity)
         {
-            OnOpenOrderUpdateReceived?.Invoke(this, openOrder);
+            _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.MarketOrder(side, quantity));
         }
-        public event EventHandler<OrderStatusHandler> OnOrderStatusReceived;        
-        private void OnOrderStatusReceivedHandler(OrderStatusHandler orderStatus)
+        public void PreviewMarketOrder(OrderSide side, Contract contract, double quantity)
         {
-            OnOrderStatusReceived?.Invoke(this, orderStatus);
-        }
-        public void OpenMarketOrder(OrderAction orderAction, Contract contract, double quantity)
-        {
-            _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.MarketOrder(orderAction, quantity));
-        }
-        public void PreviewMarketOrder(OrderAction orderAction, Contract contract, double quantity)
-        {
-            _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.WhatIfMarketOrder(orderAction, quantity));
+            _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.WhatIfMarketOrder(side, quantity));
         }
         public virtual void orderStatus(int orderId, string status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
         {
@@ -194,7 +202,7 @@ namespace IB.Api.Tws.Client
                 WhyHeld = whyHeld,
                 MktCapPrice = mktCapPrice
             };
-            OnOrderStatusReceivedHandler(orderStatusHandler);
+            OnOrderStatusReceived?.Invoke(this, orderStatusHandler);
         }
         public virtual void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
         {
@@ -205,49 +213,43 @@ namespace IB.Api.Tws.Client
                 Order = order,
                 OrderState = orderState
             };
-            OnOpenOrderUpdateReceivedHandler(openOrder);
+            OnOpenOrderUpdateReceived?.Invoke(this, openOrder);
         }
-        public virtual void openOrderEnd()
-        {
-            Console.WriteLine("OpenOrderEnd");
-        }
+        public virtual void openOrderEnd() { }
         public virtual void completedOrder(Contract contract, Order order, OrderState orderState)
         {
             var orderStatusHandler = new OrderStatusHandler
             {
                 Status = orderState.Status,
-                PermId =  order.PermId
+                PermId = order.PermId
             };
-            OnOrderStatusReceivedHandler(orderStatusHandler);        
+            OnOrderStatusReceived?.Invoke(this, orderStatusHandler);
         }
-        public virtual void completedOrdersEnd() {}
+        public virtual void completedOrdersEnd() { }
     }
 
     //Contract
     public partial class IbGatewayClient
     {
-        public event EventHandler<List<ContractDetails>> OnContractDetailsReceived;        
-        private void OnContractDetailsReceivedHandler(List<ContractDetails> contractDetailsList)
-        {
-            OnContractDetailsReceived?.Invoke(this, contractDetailsList);
-        }
+        public event EventHandler<List<ContractDetails>> OnContractDetailsReceived;
         private List<ContractDetails> _contractDetailsList;
         public void RequestContractDetails(int id, string symbol, SecurityType securityType)
         {
             _contractDetailsList = new List<ContractDetails>();
-            _clientSocket.reqContractDetails(id, 
-                new Contract { 
+            _clientSocket.reqContractDetails(id,
+                new Contract
+                {
                     Symbol = symbol,
                     SecType = securityType.ToString()
-                    });
-        }        
+                });
+        }
         public virtual void contractDetails(int reqId, ContractDetails contractDetails)
         {
             _contractDetailsList.Add(contractDetails);
         }
         public virtual void contractDetailsEnd(int reqId)
         {
-            OnContractDetailsReceivedHandler(_contractDetailsList);
+            OnContractDetailsReceived?.Invoke(this, _contractDetailsList);
         }
     }
 
@@ -330,7 +332,7 @@ namespace IB.Api.Tws.Client
         public virtual void accountSummaryEnd(int reqId)
         {
             Console.WriteLine("AccountSummaryEnd. Req Id: " + reqId + "\n");
-        }        
+        }
         public virtual void execDetails(int reqId, Contract contract, Execution execution)
         {
             Console.WriteLine("ExecDetails. " + reqId + " - " + contract.Symbol + ", " + contract.SecType + ", " + contract.Currency + " - " + execution.ExecId + ", " + execution.OrderId + ", " + execution.Shares + ", " + execution.LastLiquidity);
@@ -346,11 +348,7 @@ namespace IB.Api.Tws.Client
         public virtual void fundamentalData(int reqId, string data)
         {
             Console.WriteLine("FundamentalData. " + reqId + "" + data + "\n");
-        }
-        public virtual void historicalData(int reqId, Bar bar)
-        {
-            Console.WriteLine("HistoricalData. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
-        }
+        }        
         public virtual void marketDataType(int reqId, int marketDataType)
         {
             Console.WriteLine("MarketDataType. " + reqId + ", Type: " + marketDataType + "\n");
@@ -358,22 +356,6 @@ namespace IB.Api.Tws.Client
         public virtual void updateMktDepth(int tickerId, int position, int operation, int side, double price, int size)
         {
             Console.WriteLine("UpdateMarketDepth. " + tickerId + " - Position: " + position + ", Operation: " + operation + ", Side: " + side + ", Price: " + price + ", Size: " + size);
-        }
-        public virtual void updateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size, bool isSmartDepth)
-        {
-            var data = new MarketDepthLevel2Handler
-            {
-                At = DateTime.Now,
-                TickerId = tickerId,
-                Position = position,
-                MarketMaker = marketMaker,
-                Operation = operation,
-                Side = side,
-                Price = price,
-                Size = size,
-                IsSmartDepth = isSmartDepth
-            };
-            OnMarketDepthLevel2ReceivedHandler(data);
         }
         public virtual void updateNewsBulletin(int msgId, int msgType, String message, String origExchange)
         {
@@ -405,11 +387,7 @@ namespace IB.Api.Tws.Client
         {
             Console.WriteLine("BondContractDetails begin. ReqId: " + requestId);
             Console.WriteLine("BondContractDetails end. ReqId: " + requestId);
-        }
-        public virtual void historicalDataEnd(int reqId, string startDate, string endDate)
-        {
-            Console.WriteLine("HistoricalDataEnd - " + reqId + " from " + startDate + " to " + endDate);
-        }
+        }        
         public virtual void verifyMessageAPI(string apiData)
         {
             Console.WriteLine("verifyMessageAPI: " + apiData);
@@ -441,7 +419,7 @@ namespace IB.Api.Tws.Client
         public virtual void positionMultiEnd(int reqId)
         {
             Console.WriteLine("Position Multi End. Request: " + reqId + "\n");
-        }        
+        }
         public void securityDefinitionOptionParameter(int reqId, string exchange, int underlyingConId, string tradingClass, string multiplier, HashSet<string> expirations, HashSet<double> strikes)
         {
             Console.WriteLine("Security Definition Option Parameter. Reqest: {0}, Exchange: {1}, Undrelying contract id: {2}, Trading class: {3}, Multiplier: {4}, Expirations: {5}, Strikes: {6}",
@@ -638,7 +616,7 @@ namespace IB.Api.Tws.Client
         public void orderBound(long orderId, int apiClientId, int apiOrderId)
         {
             Console.WriteLine("Order bound. Order Id: {0}, Api Client Id: {1}, Api Order Id: {2}", orderId, apiClientId, apiOrderId);
-        }       
+        }
 
         public virtual void updateAccountValue(string key, string value, string currency, string accountName)
         {
@@ -650,6 +628,26 @@ namespace IB.Api.Tws.Client
         public virtual void accountDownloadEnd(string account)
         {
             Console.WriteLine($"Account download end| account:{account}");
-        } 
+        }
+        public virtual void tickSize(int tickerId, int field, int size)
+        {
+            //Console.WriteLine("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
+        }
+        public virtual void tickString(int tickerId, int tickType, string value)
+        {
+            //Console.WriteLine("Tick string. Ticker Id:" + tickerId + ", Type: " + tickType + ", Value: " + value);
+        }
+        public virtual void tickGeneric(int tickerId, int field, double value)
+        {
+            //Console.WriteLine("Tick Generic. Ticker Id:" + tickerId + ", Field: " + field + ", Value: " + value);
+        }
+        public virtual void tickEFP(int tickerId, int tickType, double basisPoints, string formattedBasisPoints, double impliedFuture, int holdDays, string futureLastTradeDate, double dividendImpact, double dividendsToLastTradeDate)
+        {
+            //Console.WriteLine("TickEFP. "+tickerId+", Type: "+tickType+", BasisPoints: "+basisPoints+", FormattedBasisPoints: "+formattedBasisPoints+", ImpliedFuture: "+impliedFuture+", HoldDays: "+holdDays+", FutureLastTradeDate: "+futureLastTradeDate+", DividendImpact: "+dividendImpact+", DividendsToLastTradeDate: "+dividendsToLastTradeDate);
+        }
+        public virtual void tickSnapshotEnd(int tickerId)
+        {
+            //Console.WriteLine("TickSnapshotEnd: "+tickerId);
+        }
     }
 }

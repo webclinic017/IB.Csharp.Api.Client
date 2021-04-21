@@ -4,6 +4,7 @@ namespace IB.Api.Tws.Client.Types
     {
         PreSubmitted,
         Active,
+        Closed,
         Sold,
         Complete
     }

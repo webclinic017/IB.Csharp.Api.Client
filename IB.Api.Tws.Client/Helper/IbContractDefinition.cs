@@ -7,7 +7,7 @@ namespace IB.Api.Tws.Client.Helper
         public static Contract Apple()
         {
             Contract contract = new Contract();
-            contract.Id = 1000;
+            contract.RequestId = 1000;
             contract.Symbol = "AAPL";
             contract.Currency = "USD";
             contract.SecType = "STK";
@@ -15,10 +15,10 @@ namespace IB.Api.Tws.Client.Helper
             contract.PrimaryExch = "NASDAQ";
             return contract;
         }
-        public static Contract NasdaqStock(int id, string symbol)
+        public static Contract NasdaqStock(int requestId, string symbol)
         {
             Contract contract = new Contract();
-            contract.Id = id;
+            contract.RequestId = requestId;
             contract.Symbol = symbol;
             contract.Currency = "USD";
             contract.SecType = "STK";
@@ -29,7 +29,7 @@ namespace IB.Api.Tws.Client.Helper
         public static Contract EurGbpFx()
         {
             Contract contract = new Contract();
-            contract.Id = 1001;
+            contract.RequestId = 1001;
             contract.Symbol = "EUR";
             contract.SecType = "CASH";
             contract.Currency = "GBP";
@@ -39,7 +39,7 @@ namespace IB.Api.Tws.Client.Helper
         public static Contract Dax30()
         {
             Contract contract = new Contract();
-            contract.Id = 1002;
+            contract.RequestId = 1002;
             contract.Symbol = "DAX";
             contract.SecType = "IND";
             contract.Currency = "EUR";
@@ -53,9 +53,10 @@ namespace IB.Api.Tws.Client.Helper
         /// <param name="localSymbol">Symbol on the TWS definition dialog</param>
         /// <param name="exchange"></param>
         /// <returns></returns>
-        public static Contract Future(string symbol, string localSymbol, Exchange exchange)
+        public static Contract Future(int requestId, string symbol, string localSymbol, Exchange exchange)
         {
             Contract contract = new Contract();
+            contract.RequestId = requestId;
             contract.Symbol = symbol;
             contract.SecType = "FUT";
             contract.Exchange = exchange.ToString();
