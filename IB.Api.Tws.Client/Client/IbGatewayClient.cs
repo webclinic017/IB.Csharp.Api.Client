@@ -6,6 +6,7 @@ using System.Threading;
 using IB.Api.Tws.Client.Types;
 using IB.Api.Tws.Client.Handler;
 using IB.Api.Tws.Client.Helper;
+using System.Text.RegularExpressions;
 
 namespace IB.Api.Tws.Client
 {
@@ -19,7 +20,7 @@ namespace IB.Api.Tws.Client
 
             foreach (var account in accounts)
             {
-                var requestId = int.Parse(account.Replace("U", string.Empty));
+                var requestId = int.Parse(Regex.Match(account, @"\d+").Value);
                 _clientSocket.reqAccountUpdatesMulti(requestId, account, "", false);
                 _accountUpdates.Add(new AccountUpdateHandler(requestId, account));
             }
@@ -29,7 +30,7 @@ namespace IB.Api.Tws.Client
 
             foreach (var account in accounts)
             {
-                _clientSocket.cancelAccountUpdatesMulti(int.Parse(account.Replace("U", string.Empty)));
+                _clientSocket.cancelAccountUpdatesMulti(int.Parse(Regex.Match(account, @"\d+").Value));
             }
         }
         public virtual void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency)
