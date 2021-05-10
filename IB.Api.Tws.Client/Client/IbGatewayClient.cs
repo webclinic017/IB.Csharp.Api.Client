@@ -47,7 +47,7 @@ namespace IB.Api.Tws.Client
         public virtual void accountUpdateMultiEnd(int requestId)
         {
             OnUpdateMultipleAccounts?.Invoke(this, _accountUpdates);
-            LogEvent($"Subscribed to {requestId} account updates");
+            LogEvent($"Subscribed to account:{requestId} updates");
         }
     }
 
