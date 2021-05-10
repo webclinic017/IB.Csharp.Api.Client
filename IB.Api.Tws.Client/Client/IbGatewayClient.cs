@@ -69,7 +69,7 @@ namespace IB.Api.Tws.Client
         }
         public virtual void positionEnd()
         {
-            LogEvent("PositionEnd \n");
+            LogEvent("Position End \n");
         }
         public virtual void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
         {
@@ -102,11 +102,13 @@ namespace IB.Api.Tws.Client
             {
                 case TickType.BID:
                     {
+                        priceItem.At = DateTime.Now;
                         priceItem.Bid = price;
                         break;
                     }
                 case TickType.ASK:
                     {
+                        priceItem.At = DateTime.Now;
                         priceItem.Ask = price;
                         break;
                     }
