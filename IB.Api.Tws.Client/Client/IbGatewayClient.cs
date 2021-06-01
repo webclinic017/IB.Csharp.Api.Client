@@ -12,8 +12,36 @@ namespace IB.Api.Tws.Client
 {
     //Accounts
     public partial class IbGatewayClient
-    {
+    {   
         private List<AccountUpdateHandler> _accountUpdates;
+        public event EventHandler<List<AccountUpdateHandler>> OnUpdateAccounts;
+
+        //single account        
+        public void SubscribeToAccountUpdates(string account)
+        {
+            _accountUpdates = new List<AccountUpdateHandler>();
+            _clientSocket.reqAccountUpdates(true, account);
+            _accountUpdates.Add(new AccountUpdateHandler(1, account));
+        }
+        public void UnsubscribefromAccountUpdates(string account)
+        {
+            _clientSocket.reqAccountUpdates(false, account);
+        }
+        public virtual void updateAccountValue(string key, string value, string currency, string accountName)
+        {
+            _accountUpdates.ForEach(accountUpdateHandler =>
+            {
+                if (accountUpdateHandler.AccountId == accountName)
+                    accountUpdateHandler.AccountValues[key] = value;
+            });
+        }
+        public virtual void accountDownloadEnd(string account)
+        {
+            OnUpdateAccounts?.Invoke(this, _accountUpdates);
+            LogEvent($"Subscribed to account: {account} updates");
+        }
+
+        //Multiple accounts
         public void SubscribeToAllAccountUpdates(List<string> accounts)
         {
             _accountUpdates = new List<AccountUpdateHandler>();
@@ -31,7 +59,7 @@ namespace IB.Api.Tws.Client
             {
                 var requestId = int.Parse(Regex.Match(account, @"\d+").Value);
                 _clientSocket.cancelAccountUpdatesMulti(requestId);
-                LogEvent($"Unsubscribed to {requestId} account updates");
+                LogEvent($"Unsubscribed from account: {requestId} updates");
             }
         }
         public virtual void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency)
@@ -41,42 +69,39 @@ namespace IB.Api.Tws.Client
                 if (accountUpdateHandler.AccountId == account)
                     accountUpdateHandler.AccountValues[key] = value;
             });
-        }
-        public event EventHandler<List<AccountUpdateHandler>> OnUpdateMultipleAccounts;
-
+        }        
         public virtual void accountUpdateMultiEnd(int requestId)
         {
-            OnUpdateMultipleAccounts?.Invoke(this, _accountUpdates);
-            LogEvent($"Subscribed to account:{requestId} updates");
+            OnUpdateAccounts?.Invoke(this, _accountUpdates);
+            LogEvent($"Subscribed to multiple accounts: {requestId} updates");
         }
-    }
 
-    //Positions
-    public partial class IbGatewayClient
-    {
         public event EventHandler<PositionHandler> OnPortfolioUpdateReceived;
-        public void SubscribeToPositionUpdates()
-        {
-            _clientSocket.reqPositions();
-        }
-        public void UnsubscribeFromPositionUpdates()
-        {
-            _clientSocket.cancelPositions();
-        }
-        public virtual void position(string account, Contract contract, double pos, double avgCost)
-        {
-            LogEvent("Position. " + account + " - Symbol: " + contract.Symbol + ", SecType: " + contract.SecType + ", Currency: " + contract.Currency + ", Position: " + pos + ", Avg cost: " + avgCost);
-        }
-        public virtual void positionEnd()
-        {
-            LogEvent("Position End \n");
-        }
+
+        /// <summary>
+        /// This method is triggered when account is subscribed to accountUpdates
+        /// </summary>
+        /// <param name="contract"></param>
+        /// <param name="position"></param>
+        /// <param name="marketPrice"></param>
+        /// <param name="marketValue"></param>
+        /// <param name="averageCost"></param>
+        /// <param name="unrealizedPNL"></param>
+        /// <param name="realizedPNL"></param>
+        /// <param name="accountName"></param>
         public virtual void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
         {
             OnPortfolioUpdateReceived?.Invoke(this, new PositionHandler(contract, position, marketPrice, unrealizedPNL));
         }
+        public virtual void position(string account, Contract contract, double pos, double avgCost)
+        {
+            OnPortfolioUpdateReceived?.Invoke(this, new PositionHandler(contract, pos, 0, 0));
+        }
+        public virtual void positionEnd()
+        {
+            LogEvent($"Positions updated");
+        }        
     }
-
     //Market Real Time Data
     public partial class IbGatewayClient
     {
@@ -628,17 +653,11 @@ namespace IB.Api.Tws.Client
             LogEvent(string.Format("Order bound. Order Id: {0}, Api Client Id: {1}, Api Order Id: {2}", orderId, apiClientId, apiOrderId));
         }
 
-        public virtual void updateAccountValue(string key, string value, string currency, string accountName)
-        {
-            LogEvent($"Account update| key:{key} value:{value} currency:{currency} accountName:{accountName}");
-        }
+        
         public virtual void updateAccountTime(string timestamp)
         {
         }
-        public virtual void accountDownloadEnd(string account)
-        {
-            LogEvent($"Account download end| account:{account}");
-        }
+        
         public virtual void tickSize(int tickerId, int field, int size)
         {
             //LogEvent("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
