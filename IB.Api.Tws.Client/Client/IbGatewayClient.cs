@@ -281,34 +281,34 @@ namespace IB.Api.Tws.Client
     //Executions
     public partial class IbGatewayClient
     {
-        public event EventHandler<ExecutionHandler> OnExecutionUpdateReceived;
-        private Contract _contract;
-        private Execution _execution;
-        private CommissionReport _commissionReport;
+        public event EventHandler<List<ExecutionHandler>> OnExecutionUpdateReceived;
+        private List<ExecutionHandler> executions;
         public void RequestExecutions()
         {
+            executions = new List<ExecutionHandler>();
             _clientSocket.reqExecutions(10001, new ExecutionFilter());
         }
         public virtual void execDetails(int reqId, Contract contract, Execution execution)
         {
-            _contract = contract;
-            _execution = execution;
+            executions.Add(new ExecutionHandler
+            {
+                Contract = contract,
+                Execution = execution
+            });
         }
         public virtual void commissionReport(CommissionReport commissionReport)
         {
-            _commissionReport = commissionReport;
+            executions.ForEach(execution =>
+            {
+                if (commissionReport.ExecId == execution.Execution.ExecId)
+                {
+                    execution.CommissionReport = commissionReport;
+                }
+            });
         }
         public virtual void execDetailsEnd(int reqId)
         {
-            var executionHandler = new ExecutionHandler
-            {
-                RequestId = reqId,
-                Contract = _contract,
-                Execution = _execution,
-                CommissionReport = _commissionReport
-            };
-
-            OnExecutionUpdateReceived?.Invoke(this, executionHandler);
+            OnExecutionUpdateReceived?.Invoke(this, executions);
         }                
     }
 
