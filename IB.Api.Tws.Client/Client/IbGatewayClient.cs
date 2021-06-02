@@ -203,11 +203,7 @@ namespace IB.Api.Tws.Client
         public void RequestCompletedOrders()
         {
             _clientSocket.reqCompletedOrders(true);
-        }
-        public void RequestExecutions()
-        {
-            _clientSocket.reqExecutions(10001, new ExecutionFilter());
-        }
+        }        
         public void OpenMarketOrder(OrderSide side, Contract contract, double quantity)
         {
             _clientSocket.placeOrder(NextOrderId++, contract, OrderHelper.MarketOrder(side, quantity));
@@ -286,24 +282,34 @@ namespace IB.Api.Tws.Client
     public partial class IbGatewayClient
     {
         public event EventHandler<ExecutionHandler> OnExecutionUpdateReceived;
-        private ExecutionHandler executionHandler;
+        private Contract _contract;
+        private Execution _execution;
+        private CommissionReport _commissionReport;
+        public void RequestExecutions()
+        {
+            _clientSocket.reqExecutions(10001, new ExecutionFilter());
+        }
         public virtual void execDetails(int reqId, Contract contract, Execution execution)
         {
-            executionHandler = new ExecutionHandler
-            {
-                RequestId = reqId,
-                Contract = contract,
-                Execution = execution
-            };
-        }
-        public virtual void execDetailsEnd(int reqId)
-        {
-            OnExecutionUpdateReceived?.Invoke(this, executionHandler);
+            _contract = contract;
+            _execution = execution;
         }
         public virtual void commissionReport(CommissionReport commissionReport)
         {
-            executionHandler.CommissionReport = commissionReport;
-        }        
+            _commissionReport = commissionReport;
+        }
+        public virtual void execDetailsEnd(int reqId)
+        {
+            var executionHandler = new ExecutionHandler
+            {
+                RequestId = reqId,
+                Contract = _contract,
+                Execution = _execution,
+                CommissionReport = _commissionReport
+            };
+
+            OnExecutionUpdateReceived?.Invoke(this, executionHandler);
+        }                
     }
 
     public partial class IbGatewayClient : EWrapper
