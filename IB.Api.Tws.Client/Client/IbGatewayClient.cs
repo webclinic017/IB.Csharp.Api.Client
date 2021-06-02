@@ -258,7 +258,7 @@ namespace IB.Api.Tws.Client
         public virtual void completedOrdersEnd() { }
     }
 
-    //Contract
+    //Contracts
     public partial class IbGatewayClient
     {
         public event EventHandler<List<ContractDetails>> OnContractDetailsReceived;
@@ -281,6 +281,29 @@ namespace IB.Api.Tws.Client
         {
             OnContractDetailsReceived?.Invoke(this, _contractDetailsList);
         }
+    }
+    //Executions
+    public partial class IbGatewayClient
+    {
+        public event EventHandler<ExecutionHandler> OnExecutionUpdateReceived;
+        private ExecutionHandler executionHandler;
+        public virtual void execDetails(int reqId, Contract contract, Execution execution)
+        {
+            executionHandler = new ExecutionHandler
+            {
+                RequestId = reqId,
+                Contract = contract,
+                Execution = execution
+            };
+        }
+        public virtual void execDetailsEnd(int reqId)
+        {
+            OnExecutionUpdateReceived?.Invoke(this, executionHandler);
+        }
+        public virtual void commissionReport(CommissionReport commissionReport)
+        {
+            executionHandler.CommissionReport = commissionReport;
+        }        
     }
 
     public partial class IbGatewayClient : EWrapper
@@ -369,19 +392,7 @@ namespace IB.Api.Tws.Client
         public virtual void accountSummaryEnd(int reqId)
         {
             LogEvent("AccountSummaryEnd. Req Id: " + reqId + "\n");
-        }
-        public virtual void execDetails(int reqId, Contract contract, Execution execution)
-        {
-            LogEvent("ExecDetails. " + reqId + " - " + contract.Symbol + ", " + contract.SecType + ", " + contract.Currency + " - " + execution.ExecId + ", " + execution.OrderId + ", " + execution.Shares + ", " + execution.LastLiquidity);
-        }
-        public virtual void execDetailsEnd(int reqId)
-        {
-            LogEvent("ExecDetailsEnd. " + reqId + "\n");
-        }
-        public virtual void commissionReport(CommissionReport commissionReport)
-        {
-            LogEvent("CommissionReport. " + commissionReport.ExecId + " - " + commissionReport.Commission + " " + commissionReport.Currency + " RPNL " + commissionReport.RealizedPNL);
-        }
+        }        
         public virtual void fundamentalData(int reqId, string data)
         {
             LogEvent("FundamentalData. " + reqId + "" + data + "\n");
