@@ -40,6 +40,11 @@ namespace IB.Tws.Client.Implementation
         {
             _clientSocket.eDisconnect();
         }
+        void EWrapper.connectAck()
+        {
+            if (_clientSocket.AsyncEConnect)
+                _clientSocket.startApi();
+        } 
         void EWrapper.error(Exception e)
         {
             LogEvent("Exception thrown: " + e);
