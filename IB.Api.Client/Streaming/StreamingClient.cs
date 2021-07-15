@@ -3,19 +3,17 @@ using System.Net;
 using System.Net.Security;
 using System.Net.WebSockets;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
-using Websocket.Client;
-using Websocket.Client.Models;
+using System.Threading.Tasks;
 
 namespace IB.Api.Client.Streaming
 {
     public class StreamingClient : IDisposable
     {
         private Uri _url;
-        private WebsocketClient _client;
-        private ManualResetEvent _exitEvent;
-        public event EventHandler<ReconnectionInfo> OnReconnectionHappened;
-        public event EventHandler<ResponseMessage> OnMessageReceived;
+        ClientWebSocket _client;
+        public event EventHandler<string> OnMessageReceived;
 
         public StreamingClient()
         {
@@ -26,26 +24,29 @@ namespace IB.Api.Client.Streaming
                 {
                     return true;
                 };
-                
-            var factory = new Func<ClientWebSocket>(() => new ClientWebSocket
-            {
-                Options =
-                {
-                    RemoteCertificateValidationCallback = (message, cert, chain, sslPolicyErrors) =>
-                    {
-                        return true;
-                    }
-                }
-            });
-
-            _exitEvent = new ManualResetEvent(false);
-            _client = new WebsocketClient(_url, factory);
-            _client.ReconnectTimeout = TimeSpan.FromSeconds(30);
-
-            _client.ReconnectionHappened.Subscribe(info => OnReconnectionHappened?.Invoke(this, info));
-            _client.MessageReceived.Subscribe(msg => OnMessageReceived?.Invoke(this, msg));
+            _client = new ClientWebSocket();
+            _client.Options.RemoteCertificateValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                   {
+                       return true;
+                   };
         }
+        public async Task ConnectAsync()
+        {
+            await _client.ConnectAsync(_url, CancellationToken.None);
 
+        }
+        public async Task SubcribeToMesssagesAsync() => await ReceiveAsync();
+
+        private async Task ReceiveAsync()
+        {
+            while (_client.State == WebSocketState.Open)
+            {
+                var bytesReceived = new ArraySegment<byte>(new byte[1024]);
+                var result = await _client.ReceiveAsync(bytesReceived, CancellationToken.None);
+                var message = Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count);
+                OnMessageReceived?.Invoke(this, message);
+            }
+        }
         public void Dispose()
         {
             _client.Dispose();
