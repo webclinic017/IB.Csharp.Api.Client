@@ -30,14 +30,19 @@ namespace IB.Api.Client.Streaming
                        return true;
                    };
         }
-        public async Task ConnectAsync()
+        public async Task Connect()
         {
             await _client.ConnectAsync(_url, CancellationToken.None);
-
         }
-        public async Task SubcribeToMesssagesAsync() => await ReceiveAsync();
-
-        private async Task ReceiveAsync()
+        public async Task SendMessage(string message)
+        {
+            var encoded = Encoding.UTF8.GetBytes(message);
+            var buffer = new ArraySegment<Byte>(encoded, 0, encoded.Length);
+            await _client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+            Console.WriteLine($"Message sent: {message}");
+        }
+        public async Task SubcribeToMesssages() => await Receive();
+        private async Task Receive()
         {
             while (_client.State == WebSocketState.Open)
             {

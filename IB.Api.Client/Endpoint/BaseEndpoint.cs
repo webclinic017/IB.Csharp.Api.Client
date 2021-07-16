@@ -11,7 +11,8 @@ namespace IB.Api.Client.Endpoint
 {
     public class BaseEndpoint
     {
-        private const string _baseUri = "https://localhost:5000/v1/portal";
+        private bool _debug = true;
+        private const string _baseUri = "https://localhost:5000/v1/api";
         private const string _userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0";
         public event EventHandler<ApiResponse> OnApiResponse;
         private void OnApiResponseHandler(ApiResponse apiResponse)
@@ -41,11 +42,19 @@ namespace IB.Api.Client.Endpoint
 
                     var url = $"{_baseUri}{query}";
                     var result = httpClient.GetStringAsync(new Uri(url)).Result;
+                    if(_debug) PrintDebug($"{_baseUri}{query}", result);
                     OnApiResponseHandler(new ApiResponse { Query = query, Result = result });
                     return JsonConvert.DeserializeObject<T>(result);
                 }
             }
         }
+
+        private void PrintDebug(string query, string result)
+        {
+            Console.WriteLine(query);
+            Console.WriteLine(result);
+        }
+
         protected T PostApiResponse<T>(string query, string payload = "")
         {
             using (var httpClientHandler = new HttpClientHandler())
@@ -61,8 +70,9 @@ namespace IB.Api.Client.Endpoint
 
                     var url = $"{_baseUri}{query}";
                     using var stringContent = new StringContent(payload);
-                    var response = httpClient.PostAsync(new Uri($"{_baseUri}/{query}"), stringContent).Result;
+                    var response = httpClient.PostAsync(new Uri($"{_baseUri}{query}"), stringContent).Result;
                     var result = response.Content.ReadAsStringAsync().Result;
+                    if(_debug) PrintDebug($"{_baseUri}{query}", result);
                     OnApiResponseHandler(new ApiResponse { Query = query, Result = result });
                     return JsonConvert.DeserializeObject<T>(result);
                 }
